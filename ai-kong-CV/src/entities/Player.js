@@ -78,7 +78,6 @@ class Player extends Entity {
                 this.inputJump = false; e.preventDefault(); break;
             case 'arrowup':
                 this.inputClimbUp = false;
-                if (this.isGrounded) this._jumpConsumed = false;
                 e.preventDefault(); break;
             case 'w':
                 this.inputClimbUp = false; e.preventDefault(); break;
@@ -121,10 +120,8 @@ class Player extends Entity {
             else if (this.inputRight)              this.velocityX =  Constants.PLAYER_SPEED;
             else                                   this.velocityX =  0;
 
-            // RF-02: Espacio salta en suelo. RF-03C: flecha arriba solo salta fuera de escalera activa.
-            const spaceJump   = this.inputJump && this.isGrounded && !this._jumpConsumed;
-            const arrowUpJump = this.inputClimbUp && this.isGrounded && !this._jumpConsumed && !this.nearLadder;
-            if (spaceJump || arrowUpJump) {
+            // RF-02: solo Espacio inicia salto; flecha arriba queda reservada a escaleras (RF-03B).
+            if (this.inputJump && this.isGrounded && !this._jumpConsumed) {
                 const cb = this.getCollisionBounds();
                 this.velocityY     = -Constants.JUMP_FORCE;
                 this.isGrounded    = false;

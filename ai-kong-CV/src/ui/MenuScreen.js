@@ -88,7 +88,7 @@ class MenuScreen {
 
         const controls = [
             ['← → / A D',    'Moverse'],
-            ['ESPACIO / ↑',   'Saltar'],
+            ['ESPACIO',       'Saltar'],
             ['↑ ↓ / W S',     'Subir / Bajar escalera'],
             ['ESC',           'Pausar / Reanudar'],
         ];

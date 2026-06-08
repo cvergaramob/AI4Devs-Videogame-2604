@@ -546,6 +546,8 @@ class Game {
         this.lifeLostSequence.elapsed         = 0;
         this.lifeLostSequence.pendingGameOver = this.lives <= 0;
         this.timerSystem.pause();
+        // RF-04 / RT-16: eliminar estrellas activas y reiniciar spawn antes del respawn
+        this.spawnSystem.reset();
     }
 
     _updateLifeLostSequence(dt) {

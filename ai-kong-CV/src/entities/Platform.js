@@ -40,6 +40,30 @@ class Platform extends Entity {
     getHeightAtX(px) { return this.getTopY(px); }
 
     /**
+     * Extremo izquierdo del recorrido horizontal de Estrellas IA.
+     * Siempre el borde del canvas: las escaleras no acortan el patrol.
+     */
+    getTraversalLeftEdge() {
+        return 0;
+    }
+
+    /**
+     * Extremo derecho del recorrido horizontal de Estrellas IA.
+     * Siempre el borde del canvas: cubre zonas de escalera más allá del ancho de plataforma.
+     */
+    getTraversalRightEdge() {
+        return Constants.CANVAS_WIDTH;
+    }
+
+    /**
+     * Y de superficie para Estrellas IA en atX (extrapola inclinación fuera del ancho sólido).
+     * Ignora huecos y escaleras: la estrella flota sobre la línea de plataforma.
+     */
+    getStarSurfaceY(atX) {
+        return this.getTopY(atX);
+    }
+
+    /**
      * Devuelve true si el rango horizontal [atX, atX+width] solapa algún hueco.
      * atX y width son coordenadas ABSOLUTAS del canvas.
      */

@@ -60,7 +60,7 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 | ID | Requisito |
 |----|-----------|
 | RF-01 | El jugador debe poder moverse hacia la izquierda y derecha con las teclas de flecha o `A/D`. El movimiento debe ser fluido y responder en el mismo frame del input. |
-| RF-02 | El jugador debe poder saltar con la tecla `Espacio` o flecha arriba (fuera de escalera activa). El salto es de altura fija y no puede iniciarse en el aire (no double-jump). El propósito del salto es esquivar Estrellas IA y desplazarse dentro de la plataforma actual. |
+| RF-02 | El jugador debe poder saltar **únicamente** con la tecla `Espacio`. El salto es de altura fija y no puede iniciarse en el aire (no double-jump). La flecha arriba **no** inicia salto bajo ninguna circunstancia. El propósito del salto es esquivar Estrellas IA y desplazarse dentro de la plataforma actual. |
 | RF-02A | El salto permite únicamente desplazarse dentro de la plataforma actual. La altura máxima del salto debe ser inferior a la distancia vertical existente entre dos plataformas consecutivas. Bajo ninguna circunstancia un salto puede permitir alcanzar, tocar, aterrizar en o acceder directamente a una plataforma superior. El salto no puede sustituir a las escaleras como mecanismo de ascenso. |
 | RF-02B | El salto sigue una trayectoria parabólica compuesta por una fase de ascenso y una fase de descenso gobernadas por la gravedad del juego. La duración total del salto debe ser aproximadamente de 1 segundo (±20%). |
 | RF-02C | El jugador puede ejecutar un salto sin desplazamiento horizontal. Si durante el salto mantiene presionada la flecha izquierda/derecha o las teclas A/D, conserva el control horizontal y continúa desplazándose en esa dirección mientras permanece en el aire. |
@@ -68,18 +68,18 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 | RF-03 | El jugador debe poder subir y bajar escaleras presionando las teclas de dirección vertical cuando se encuentra en la hitbox de una escalera activa. |
 
 | RF-03A | Las escaleras constituyen el único mecanismo que permite ascender entre plataformas. No existe ninguna otra acción, combinación de teclas o mecánica que permita acceder a una plataforma superior. |
-| RF-03B | Cuando el jugador se encuentra alineado con una escalera activa, la flecha arriba inicia o continúa el ascenso y la flecha abajo inicia o continúa el descenso. Fuera de una escalera activa, dichas teclas no producen desplazamiento vertical. |
-| RF-03C | Si el jugador se encuentra dentro de la hitbox de una escalera activa, la flecha arriba debe interpretarse exclusivamente como acción de ascenso por escalera y no como salto. |
+| RF-03B | Cuando el jugador se encuentra alineado con una escalera activa, la flecha arriba inicia o continúa el ascenso y la flecha abajo inicia o continúa el descenso. Fuera de una escalera activa, la flecha arriba no produce ninguna acción (ni salto ni desplazamiento vertical). |
+| RF-03C | La flecha arriba solo puede interpretarse como acción de escalera cuando el jugador está dentro de la hitbox de una escalera activa. Fuera de ese contexto, no debe iniciar salto ni ningún otro movimiento. |
 | RF-03D | El jugador puede regresar a una plataforma inferior utilizando una escalera activa mediante la flecha abajo o dejando que el personaje caiga por un hueco del escenario. |
-| RF-04 | Al perder una vida, el juego se pausa brevemente (~2,5 s) mostrando un mensaje visual («VIDA PERDIDA» + «TE QUEDAN X VIDAS»). Tras la pausa, el jugador reaparece al **inicio** de la última plataforma alcanzada (punto de entrada natural de dicha plataforma), no en la posición exacta donde ocurrió la muerte, y debe volver a recorrerla. Si muere en Plataforma 1 → reaparece en el punto inicial del nivel. Si muere en Plataforma 2 → reaparece al inicio de Plataforma 2. Si muere en Plataforma 3 → reaparece al inicio de Plataforma 3. Si muere en Plataforma 4 → reaparece al inicio de Plataforma 4. Si muere en Plataforma 5 → reaparece al inicio de Plataforma 5. Si muere en Plataforma 6 → reaparece al inicio de Plataforma 6. |
+| RF-04 | Al perder una vida, el juego se pausa brevemente (~2,5 s) mostrando un mensaje visual («VIDA PERDIDA» + «TE QUEDAN X VIDAS»). Durante la pausa, **todas las Estrellas IA activas se eliminan** y el sistema de spawn se reinicia (equivalente al estado inicial de una partida nueva respecto a las estrellas). Tras la pausa, el jugador reaparece al **inicio** de la última plataforma alcanzada (punto de entrada natural de dicha plataforma), no en la posición exacta donde ocurrió la muerte, y debe volver a recorrerla. La primera Estrella IA tras el respawn debe generarse **2 segundos** después de reanudar el juego; las siguientes, cada **6 segundos**. Si muere en Plataforma 1 → reaparece en el punto inicial del nivel. Si muere en Plataforma 2 → reaparece al inicio de Plataforma 2. Si muere en Plataforma 3 → reaparece al inicio de Plataforma 3. Si muere en Plataforma 4 → reaparece al inicio de Plataforma 4. Si muere en Plataforma 5 → reaparece al inicio de Plataforma 5. Si muere en Plataforma 6 → reaparece al inicio de Plataforma 6. |
 | RF-05 | Al caer por un hueco, el jugador desciende a la plataforma inferior, pierde 100 puntos y no pierde vida. |
 
 ### Estrellas IA
 
 | ID | Requisito |
 |----|-----------|
-| RF-06 | La primera Estrella IA debe generarse 2 segundos después del inicio de la partida. Las siguientes se generan cada 6 segundos de forma continua durante toda la partida. |
-| RF-07 | Las Estrellas IA se desplazan en sentido descendente a velocidad constante y lenta. No utilizan escaleras, no caen por huecos, y desaparecen al llegar al límite inferior del escenario. |
+| RF-06 | La primera Estrella IA debe generarse 2 segundos después del inicio de la partida **o 2 segundos después de cada respawn por pérdida de vida**. Las siguientes se generan cada 6 segundos de forma continua durante toda la partida. |
+| RF-07 | Las Estrellas IA se desplazan en sentido descendente a velocidad constante y lenta. Recorren **siempre el 100 %** de la longitud horizontal de cada plataforma antes de descender. Las escaleras **no alteran** su trayectoria, punto de descenso ni dirección. No utilizan escaleras, no caen por huecos, y desaparecen al llegar al límite inferior del escenario. No puede existir ninguna zona segura detrás de una escalera donde el jugador permanezca indefinidamente sin riesgo. |
 | RF-08 | Cada Estrella IA se representa visualmente como un **proyectil energético**: grupo de 2 a 4 estrellas de cuatro puntas con núcleo luminoso, estela direccional, rastro energético y partículas de lanzamiento. El grupo actúa como una única entidad de colisión y movimiento. Los efectos visuales comunican dirección de movimiento y origen en la IA rebelde. |
 | RF-09 | Si una Estrella IA impacta al jugador sin protección, el jugador pierde 1 vida y reaparece. Si el jugador tiene protección activa, la Estrella IA desaparece y se consume la protección sin perder vida. |
 | RF-10 | Si el jugador salta sobre una Estrella IA (la estrella pasa por debajo durante el salto), se otorgan +100 puntos. Tres saltos consecutivos sobre Estrellas IA otorgan un bonus adicional de +500 puntos. |
@@ -147,8 +147,8 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 | RT-09A | Los parámetros de salto (velocidad inicial vertical y gravedad) deben configurarse de forma que la altura máxima alcanzable sea siempre inferior a la separación vertical entre plataformas consecutivas. |
 | RT-09B | Ninguna combinación de movimiento horizontal, salto o interacción simultánea de teclas debe permitir acceder a una plataforma superior sin utilizar una escalera activa. |
 | RT-09C | El sistema de colisiones debe rechazar aterrizajes sobre plataformas de índice superior a la plataforma de origen del salto en curso. La progresión vertical solo se registra al salir de una escalera activa o al aterrizar tras una caída por hueco. |
-| RT-10 | El movimiento de las Estrellas IA debe ser determinista y basado en delta time para garantizar consistencia a cualquier framerate. La velocidad debe ser una constante configurable. |
-| RT-11 | Los huecos en plataformas deben implementarse como zonas sin colisión. Al detectar que el jugador está sobre un hueco, debe activarse la lógica de caída hacia la plataforma inferior. |
+| RT-10 | El movimiento de las Estrellas IA debe ser determinista y basado en delta time para garantizar consistencia a cualquier framerate. La velocidad debe ser una constante configurable. Cada estrella debe recorrer el **100 %** del ancho horizontal del canvas en el nivel actual (`0` → `CANVAS_WIDTH`) antes de iniciar el descenso vertical, usando `getStarSurfaceY()` para mantenerse sobre la línea de plataforma extrapolada. Las escaleras no funcionan como waypoints ni alteran el punto de descenso. |
+| RT-11 | Los huecos en plataformas deben implementarse como zonas sin colisión. Al detectar que el jugador está sobre un hueco, debe activarse la lógica de caída hacia la plataforma inferior. Las Estrellas IA atraviesan huecos flotando, pero **no** pueden usar un hueco ni una escalera como motivo para descender antes del extremo horizontal definido de la plataforma. |
 | RT-12 | El ciclo de escaleras inestables debe controlarse con un único timer global compartido. Todas las escaleras deben cambiar de estado de forma estrictamente sincronizada en cada ciclo. |
 
 ### Estados del juego
@@ -158,6 +158,9 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 | RT-13 | El juego debe implementar una máquina de estados explícita con al menos los siguientes estados: `LOADING` → `MENU` → `PLAYING` → `PAUSED` → `VICTORY` / `GAME_OVER`. Las transiciones entre estados deben ser claras y reversibles donde corresponda. |
 | RT-14 | Debe existir una pantalla de inicio (MENU) con el título del juego, instrucciones básicas de controles y un botón/tecla para iniciar la partida. |
 | RT-15 | Las pantallas de VICTORY y GAME_OVER deben ofrecer la opción de reiniciar la partida, reseteando completamente el estado del juego (puntuación, vidas, posición, enemigos, timers). Toda la información en dichas pantallas debe presentarse de forma legible, sin superposición de textos, con márgenes y alineación consistentes. |
+| RT-16 | Al perder una vida, el `SpawnSystem` debe invocar `reset()`: liberar todas las Estrellas IA al pool, vaciar la lista de activas, reiniciar `timeSinceLastSpawn` a 0 y marcar `firstSpawn = true`. Esto ocurre **antes** del respawn del jugador, durante la secuencia de pausa. |
+| RT-17 | El salto del jugador solo puede iniciarse con la tecla `Espacio` (`inputJump`). La flecha arriba (`inputClimbUp`) queda reservada exclusivamente a la interacción con escaleras activas. No debe existir lógica alternativa que permita saltar con flecha arriba. |
+| RT-18 | La detección de extremo de plataforma para Estrellas IA debe usar los límites de recorrido del canvas (`getTraversalLeftEdge()` = `0`, `getTraversalRightEdge()` = `CANVAS_WIDTH`), sin tolerancias que acorten el recorrido ni referencias a la posición de escaleras ni al ancho visible de la plataforma. |
 
 ---
 
@@ -248,12 +251,13 @@ La inclinación visual refuerza el recorrido ascendente en zig-zag. Las Estrella
 Secuencia obligatoria al perder una vida (impacto de Estrella IA o agotamiento del temporizador):
 
 1. **Detección** — Se emite el evento de pérdida de vida; el contador de vidas se decrementa y el HUD se actualiza de inmediato.
-2. **Pausa temporal** — El gameplay y el temporizador se detienen durante **2,5 segundos** (`LIFE_LOST_PAUSE_DURATION`).
-3. **Mensaje visual** — Overlay semitransparente con:
+2. **Limpieza de enemigos** — Se eliminan **todas** las Estrellas IA activas, se vacía el pool en uso y se reinicia el sistema de spawn (`SpawnSystem.reset()`). El gameplay queda sin estrellas en pantalla.
+3. **Pausa temporal** — El gameplay y el temporizador se detienen durante **2,5 segundos** (`LIFE_LOST_PAUSE_DURATION`). Durante la pausa no se actualizan ni generan estrellas.
+4. **Mensaje visual** — Overlay semitransparente con:
    - Título: **«VIDA PERDIDA»** (rojo neón)
    - Subtítulo: **«TE QUEDAN X VIDAS»** (cian) o **«TE QUEDA 1 VIDA»** / **«SIN VIDAS RESTANTES»** según corresponda.
-4. **Comprensión** — Duración suficiente para leer el mensaje cómodamente.
-5. **Respawn** — Tras la pausa, el jugador reaparece al inicio de la última plataforma alcanzada (RF-04) y el temporizador se reanuda. Si no quedan vidas, transición a pantalla GAME_OVER.
+5. **Comprensión** — Duración suficiente para leer el mensaje cómodamente.
+6. **Respawn** — Tras la pausa, el jugador reaparece al inicio de la última plataforma alcanzada (RF-04) en un **entorno limpio** (sin Estrellas IA). El temporizador se reanuda. La primera Estrella IA se generará **2 segundos** después del respawn; las siguientes, cada **6 segundos**. Si no quedan vidas, transición a pantalla GAME_OVER.
 
 ### Estrellas IA — Apariencia de proyectil
 
@@ -304,13 +308,13 @@ Secuencia obligatoria al perder una vida (impacto de Estrella IA o agotamiento d
 
 | ID | Criterio |
 |----|----------|
-| CA-01 | **Movimiento:** El personaje responde al input de movimiento horizontal en el mismo frame. El salto desde plataforma funciona correctamente y no puede ejecutarse en el aire (no double-jump). El salto tiene trayectoria de ascenso y descenso, dura aproximadamente 1 segundo y nunca permite alcanzar ni aterrizar en una plataforma superior. Mantener pulsado el salto en ascenso solo prolonga levemente la fase actual sin superar la altura máxima. El jugador puede desplazarse horizontalmente durante el salto manteniendo presionadas las teclas izquierda/derecha o A/D. La velocidad de movimiento se percibe natural. |
-| CA-02 | **Escaleras:** El jugador puede subir y bajar todas las escaleras en estado activo. La flecha arriba se utiliza para ascender y la flecha abajo para descender. Durante el estado de advertencia (parpadeo) las escaleras siguen siendo funcionales. En estado desactivado, el acceso está completamente bloqueado. Las escaleras constituyen el único mecanismo de ascenso entre plataformas. |
+| CA-01 | **Movimiento:** El personaje responde al input de movimiento horizontal en el mismo frame. El salto desde plataforma funciona **únicamente** con `Espacio` y no puede ejecutarse en el aire (no double-jump). Presionar flecha arriba fuera de una escalera activa no produce salto ni ninguna otra acción. El salto tiene trayectoria de ascenso y descenso, dura aproximadamente 1 segundo y nunca permite alcanzar ni aterrizar en una plataforma superior. Mantener pulsado el salto en ascenso solo prolonga levemente la fase actual sin superar la altura máxima. El jugador puede desplazarse horizontalmente durante el salto manteniendo presionadas las teclas izquierda/derecha o A/D. La velocidad de movimiento se percibe natural. |
+| CA-02 | **Escaleras:** El jugador puede subir y bajar todas las escaleras en estado activo. La flecha arriba se utiliza **exclusivamente** para ascender cuando está en la hitbox de una escalera activa; la flecha abajo para descender. Fuera de escalera, la flecha arriba no hace nada. Durante el estado de advertencia (parpadeo) las escaleras siguen siendo funcionales. En estado desactivado, el acceso está completamente bloqueado. Las escaleras constituyen el único mecanismo de ascenso entre plataformas. |
 | CA-03 | **Huecos:** El jugador cae exactamente a la plataforma inferior al atravesar un hueco. La penalización de -100 puntos se aplica correctamente. No se pierde vida. |
 | CA-03A | El jugador no puede alcanzar plataformas superiores mediante saltos, movimientos diagonales ni combinaciones de teclas. Toda progresión ascendente del nivel debe realizarse exclusivamente mediante escaleras activas. |
-| CA-04 | **Estrellas IA:** La primera estrella aparece a los 2 segundos exactos. Las siguientes siguen el intervalo de 6 segundos. El movimiento descendente es visible y coherente con la inclinación de las plataformas. |
+| CA-04 | **Estrellas IA:** La primera estrella aparece a los 2 segundos exactos (inicio de partida o tras respawn por pérdida de vida). Las siguientes siguen el intervalo de 6 segundos. El movimiento descendente es visible y coherente con la inclinación de las plataformas. Cada estrella recorre el 100 % de cada plataforma antes de descender; la zona detrás de escaleras queda cubierta por el recorrido. |
 | CA-05 | **Protección:** Al recoger la esfera aparece el aura verde inmediatamente. La protección absorbe correctamente el impacto de una Estrella IA (la estrella desaparece, el jugador no pierde vida). El parpadeo de los últimos 3 segundos es visible y claro. |
-| CA-06 | **Vidas y timer:** El contador de vidas se decrementa correctamente por impacto de Estrella IA y por agotamiento del temporizador. El timer se reinicia tras perder vida si quedan vidas disponibles. La derrota ocurre únicamente al llegar a 0 vidas. Tras perder una vida, se muestra la secuencia de pausa con mensaje («VIDA PERDIDA» + vidas restantes) durante 2,5 s antes del respawn. El jugador reaparece al inicio de la última plataforma alcanzada (no en el punto de muerte), con la posición X definida por el punto de entrada de esa plataforma en `LevelData`. |
+| CA-06 | **Vidas y timer:** El contador de vidas se decrementa correctamente por impacto de Estrella IA y por agotamiento del temporizador. El timer se reinicia tras perder vida si quedan vidas disponibles. La derrota ocurre únicamente al llegar a 0 vidas. Tras perder una vida, se muestra la secuencia de pausa con mensaje («VIDA PERDIDA» + vidas restantes) durante 2,5 s antes del respawn. **No queda ninguna Estrella IA en pantalla** durante la pausa ni tras el respawn. El jugador reaparece al inicio de la última plataforma alcanzada (no en el punto de muerte), con la posición X definida por el punto de entrada de esa plataforma en `LevelData`. Existe una ventana segura mínima de **2 segundos** antes de la primera nueva estrella tras el respawn. |
 | CA-07 | **Victoria:** Al activar el interruptor se ejecuta completa la secuencia de victoria (glitches → apagado → celebración → puntuación). La partida no continúa tras la victoria. La puntuación final incluye correctamente los bonos de vida y tiempo restante. El interruptor solo puede activarse desde la Plataforma 6 tras subir la escalera 5→6. |
 | CA-07A | **Pantallas finales:** Las pantallas VICTORY y GAME_OVER presentan toda la información (puntaje, bonos, vidas, tiempo, mensajes) de forma legible, sin superposición de textos, con márgenes y alineación consistentes en la resolución base (960×640). El puntaje final (TOTAL) tiene prioridad visual en la pantalla de victoria. |
 
@@ -336,13 +340,27 @@ Secuencia obligatoria al perder una vida (impacto de Estrella IA o agotamiento d
 
 | ID | Criterio |
 |----|----------|
-| CA-13 | El reinicio de partida desde las pantallas de VICTORY o GAME_OVER debe restaurar completamente el estado inicial: puntuación en 0, 3 vidas, timer en 90s, jugador en posición inicial, esferas verdes presentes, ciclo de escaleras reiniciado. |
+| CA-13 | El reinicio de partida desde las pantallas de VICTORY o GAME_OVER debe restaurar completamente el estado inicial: puntuación en 0, 3 vidas, timer en 90s, jugador en posición inicial, esferas verdes presentes, ciclo de escaleras reiniciado, sistema de Estrellas IA reiniciado (sin estrellas activas, timer de spawn en estado inicial). |
 | CA-14 | El juego no debe producir errores en consola del browser durante una sesión normal de juego. Cualquier excepción JavaScript no capturada se considera bug bloqueante. |
 | CA-15 | El juego debe ser completable de inicio a fin (victoria y derrota) al menos 5 veces consecutivas sin necesidad de recargar el browser. |
+| CA-16 | **Salto exclusivo:** Presionar flecha arriba fuera de una escalera activa no inicia salto ni produce ninguna acción. Presionar flecha arriba dentro de una escalera activa inicia o continúa el ascenso. El salto solo puede iniciarse con barra espaciadora. |
+| CA-17 | **Respawn limpio:** Tras perder una vida, no permanece ninguna Estrella IA en pantalla; el pool de estrellas queda vacío y el timer de spawn se reinicia. La primera estrella post-respawn aparece exactamente 2 segundos después de reanudar el gameplay. |
+| CA-18 | **Recorrido completo de estrellas:** En cada plataforma, la Estrella IA alcanza el borde extremo horizontal definido antes de iniciar el descenso. No existe posición segura indefinida detrás de escaleras aprovechando un descenso prematuro de las estrellas. |
 
 ---
 
 ## 07 — Estrellas IA — Especificación de Movimiento
+
+### Comportamiento de enemigos (estrellas IA) – reglas de recorrido
+
+| Regla | Descripción |
+|-------|-------------|
+| **Recorrido extremo a extremo** | Las Estrellas IA recorren cada plataforma de borde a borde del canvas horizontal (`x = 0` → `x = CANVAS_WIDTH`), no solo el segmento sólido visible de la plataforma. |
+| **Escaleras ignoradas** | Las escaleras no afectan el path horizontal de la IA. No son waypoints, no acortan el patrol y no provocan descenso anticipado. |
+| **Navegación horizontal** | La IA ignora escaleras para navegación: las atraviesa flotando sobre la línea de superficie extrapolada de la plataforma, sin colisión ni desvío. |
+| **Sin zonas seguras** | El diseño evita zonas seguras explotables: no puede existir refugio indefinido detrás de una escalera aprovechando un descenso prematuro de la estrella. |
+| **Transiciones de nivel** | Las transiciones verticales ocurren **solo** al alcanzar el borde horizontal del canvas o por la lógica de caída entre plataformas en ese borde; **nunca** por proximidad o alineación con una escalera. |
+| **Huecos** | Los huecos de plataforma se atraviesan flotando; no interrumpen el movimiento horizontal ni motivan descenso antes del borde. |
 
 ### Movimiento — definición completa
 
@@ -352,7 +370,11 @@ Las Estrellas IA siguen un patrón de descenso en zig-zag por el escenario, reco
 
 #### Recorrido por plataforma
 
-Al aparecer, la estrella se posiciona en el extremo de la Plataforma 5 y comienza inmediatamente su recorrido horizontal. La estrella se desplaza a lo largo de toda la plataforma, de extremo a extremo, antes de iniciar el descenso a la plataforma siguiente. En ningún caso desciende antes de alcanzar el extremo opuesto de la plataforma en la que se encuentra. La estrella se mantiene sobre la superficie de la plataforma en todo momento, respetando su inclinación.
+Al aparecer, la estrella se posiciona en el extremo de la Plataforma 5 y comienza inmediatamente su recorrido horizontal. La estrella se desplaza a lo largo de **todo** el ancho del canvas en ese nivel (`x = 0` hasta `x = CANVAS_WIDTH`), manteniéndose sobre la superficie extrapolada de la plataforma, antes de iniciar el descenso a la plataforma siguiente. En ningún caso desciende antes de alcanzar el extremo opuesto real de la plataforma en la que se encuentra. La estrella se mantiene sobre la superficie de la plataforma en todo momento, respetando su inclinación.
+
+**Regla de recorrido completo:** toda superficie transitable de una plataforma debe poder ser alcanzada por una Estrella IA durante su recorrido horizontal. No puede existir ninguna posición donde el jugador permanezca indefinidamente sin riesgo únicamente aprovechando la ubicación de una escalera.
+
+**Escaleras — sin efecto en trayectoria:** las escaleras no alteran la trayectoria de las estrellas, no alteran el punto de descenso, no funcionan como waypoints ni como puntos de cambio de dirección. La parte posterior de una escalera nunca debe convertirse en un escondite seguro: la estrella debe sobrepasar visualmente la zona de escalera al recorrer el extremo completo de la plataforma antes de descender.
 
 #### Dirección horizontal
 
@@ -360,7 +382,7 @@ La dirección de movimiento horizontal de cada estrella es opuesta a la direcci�
 
 #### Transición entre plataformas
 
-Al alcanzar el extremo de una plataforma, la estrella desciende verticalmente hasta posicionarse sobre la superficie de la plataforma inmediatamente inferior. La transición es directa: no utiliza escaleras ni trayectoria diagonal. Una vez posicionada sobre la plataforma inferior, retoma inmediatamente el movimiento horizontal en la dirección opuesta a la que traía en la plataforma anterior.
+Al alcanzar el **extremo horizontal definido** de una plataforma (borde izquierdo o derecho según la dirección de movimiento), la estrella desciende verticalmente hasta posicionarse sobre la superficie de la plataforma inmediatamente inferior. La transición es directa: no utiliza escaleras ni trayectoria diagonal. El descenso ocurre **únicamente** en los extremos definidos por `getTraversalLeftEdge()` / `getTraversalRightEdge()`, nunca en posiciones intermedias ni en la proximidad de escaleras. Una vez posicionada sobre la plataforma inferior, retoma inmediatamente el movimiento horizontal en la dirección opuesta a la que traía en la plataforma anterior.
 
 #### Comportamiento ante huecos
 
@@ -433,7 +455,7 @@ Animaciones de IA (glitches, apagado), secuencia de victoria, pantallas de MENU 
 |----------|-------|
 | Vidas iniciales | 3 |
 | Temporizador inicial | 90 segundos |
-| Primera Estrella IA | A los 2 segundos |
+| Primera Estrella IA | A los 2 segundos (inicio de partida o tras respawn por pérdida de vida) |
 | Intervalo entre Estrellas IA | Cada 6 segundos |
 | Duración protección esfera verde | 10 segundos |
 | Advertencia fin de protección | Últimos 3 segundos (parpadeo) |

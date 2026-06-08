@@ -115,16 +115,17 @@ class AIStar extends Entity {
 
     _updateHorizontal(dt, platform) {
         this.x += this.velocityX * dt;
+        // Ignora escaleras: solo la superficie extrapolada de la plataforma define Y.
         this._snapToPlatformSurface();
 
-        if (!this._reachedEdge(platform)) return;
+        if (!this._reachedCanvasEdge(platform)) return;
 
         if (this.platformIndex <= 0) {
             this.active = false;
             return;
         }
 
-        this._clampToEdge(platform);
+        this._clampToCanvasEdge(platform);
         this.moveState = Constants.STAR_MOVE_STATE.DESCENDING;
         this.velocityX = 0;
         this.velocityY = Constants.STAR_SPEED;
@@ -141,7 +142,7 @@ class AIStar extends Entity {
         }
 
         const centerX = this.x + this.width / 2;
-        const targetY = nextPlatform.getTopY(centerX) - this.height;
+        const targetY = nextPlatform.getStarSurfaceY(centerX) - this.height;
 
         if (this.y < targetY) return;
 
@@ -157,21 +158,26 @@ class AIStar extends Entity {
         const platform = this.platforms[this.platformIndex];
         if (!platform) return;
         const centerX = this.x + this.width / 2;
-        this.y = platform.getTopY(centerX) - this.height;
+        this.y = platform.getStarSurfaceY(centerX) - this.height;
     }
 
-    _reachedEdge(platform) {
+    /** Borde horizontal del canvas; las escaleras no participan en esta decisión. */
+    _reachedCanvasEdge(platform) {
+        const leftEdge  = platform.getTraversalLeftEdge();
+        const rightEdge = platform.getTraversalRightEdge();
         if (this.direction > 0) {
-            return this.x + this.width >= platform.x + platform.width - 2;
+            return this.x + this.width >= rightEdge;
         }
-        return this.x <= platform.x + 2;
+        return this.x <= leftEdge;
     }
 
-    _clampToEdge(platform) {
+    _clampToCanvasEdge(platform) {
+        const leftEdge  = platform.getTraversalLeftEdge();
+        const rightEdge = platform.getTraversalRightEdge();
         if (this.direction > 0) {
-            this.x = platform.x + platform.width - this.width;
+            this.x = rightEdge - this.width;
         } else {
-            this.x = platform.x;
+            this.x = leftEdge;
         }
     }
 

@@ -6,7 +6,7 @@ Arcade de plataformas inspirado en Donkey Kong, desarrollado completamente en **
 
 ### Controles
 - **← / →** o **A / D**: Movimiento izquierda/derecha
-- **ESPACIO** o **↑**: Saltar
+- **ESPACIO**: Saltar
 - **↑ / ↓** o **W / S**: Subir/Bajar escaleras
 
 ### Objetivo

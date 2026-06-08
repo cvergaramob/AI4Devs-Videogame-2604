@@ -1845,3 +1845,309 @@ Al finalizar:
 4. Confirmar que la Plataforma 6 solo puede alcanzarse mediante la última escalera.
 5. Confirmar que la pantalla final ya no presenta textos superpuestos.
 ```
+---
+
+## Prompt 24
+**IA:** ChatGPT  
+**Modelo:** GPT-5.5
+
+### Contenido
+
+```text
+Actúa como ingeniero de prompts experto y generá un prompt para solucionar los siguientes bugs del juego: 
+- cuando se pierde una vida las estrellas ia siguen corriendo y al volver al juego puedo chocar otra antes de poder moverme. Al volver a reiniciar despues de perder una vida, las estrellas ia del tablero se limpian y comienzan a lanzarse como al iniciar la partida. 
+- sólo se puede saltar usando la barra espaciadora, no se salta con la flecha hacia arriba. 
+- las estrellitas ia recorren la plataforma hasta el final de la línea y caen por detrás de la escalera. Esto es para que la parte de atrás de la escalera no sirva como escondite para que el humano evite las estrellas. 
+Generá el prompt para hacer estas tres correcciones y que queden reflejadas en el archivo prd.
+```
+
+---
+
+## Prompt 25
+**IA:** Cursor  
+**Modelo:** Agent Auto
+
+### Contenido
+
+```text
+Actúa como un desarrollador senior de videojuegos HTML5/Canvas y como analista funcional responsable de mantener sincronizados el código y el PRD.
+
+Tu tarea es corregir los siguientes bugs de gameplay y actualizar el PRD para que refleje exactamente el comportamiento esperado.
+
+IMPORTANTE
+Analiza primero la arquitectura actual.
+Identifica todos los módulos afectados.
+Implementa las correcciones en código.
+Actualiza el PRD en todas las secciones necesarias.
+Verifica que no existan contradicciones entre requisitos funcionales, criterios de aceptación y comportamiento real.
+Entrega un resumen detallado de los cambios realizados.
+BUG 1 – Reinicio incorrecto de Estrellas IA al perder una vida
+Problema actual
+
+Cuando el jugador pierde una vida:
+
+aparece el mensaje de vida perdida,
+se realiza el respawn,
+pero las Estrellas IA continúan existiendo y moviéndose durante la pausa.
+
+Como consecuencia, al reaparecer el jugador puede colisionar inmediatamente con una estrella antes de poder reaccionar o moverse.
+
+Esto genera muertes injustas y rompe la experiencia de juego.
+
+Comportamiento requerido
+
+Al perder una vida:
+
+Descontar la vida correspondiente.
+Mostrar el mensaje "VIDA PERDIDA".
+Pausar el gameplay durante la duración configurada.
+Antes del respawn:
+eliminar todas las Estrellas IA activas,
+limpiar completamente el pool/lista de estrellas,
+reiniciar el sistema de spawn,
+reiniciar el timer interno de generación.
+Reposicionar al jugador en el punto de respawn correspondiente.
+Reanudar el juego.
+La primera Estrella IA debe volver a generarse 2 segundos después del respawn.
+Las siguientes deben continuar apareciendo cada 6 segundos.
+
+El comportamiento debe ser equivalente al estado inicial de una partida nueva respecto a las Estrellas IA.
+
+Criterio de aceptación
+
+Después de perder una vida:
+
+no debe quedar ninguna Estrella IA en pantalla,
+el jugador debe reaparecer en un entorno limpio,
+debe existir una ventana segura mínima de 2 segundos antes de la aparición de la primera nueva estrella.
+BUG 2 – Control de salto incorrecto
+Problema actual
+
+El personaje puede saltar usando:
+
+barra espaciadora,
+flecha arriba.
+
+Esto entra en conflicto con el sistema de escaleras.
+
+Comportamiento requerido
+
+La barra espaciadora debe ser la única tecla válida para saltar.
+
+Reglas
+ESPACIO = saltar.
+FLECHA ARRIBA = subir escaleras.
+FLECHA ABAJO = bajar escaleras.
+A/D o IZQUIERDA/DERECHA = movimiento horizontal.
+
+Fuera de una escalera activa:
+
+la flecha arriba no debe producir salto,
+la flecha arriba no debe producir ninguna otra acción.
+
+Eliminar cualquier lógica existente que permita iniciar un salto mediante ArrowUp.
+
+Criterio de aceptación
+Presionar flecha arriba fuera de una escalera no hace nada.
+Presionar flecha arriba dentro de una escalera inicia el ascenso.
+El salto solo puede iniciarse con barra espaciadora.
+BUG 3 – Recorrido incorrecto de Estrellas IA cerca de escaleras
+Problema actual
+
+Las Estrellas IA están descendiendo antes de completar totalmente algunas plataformas.
+
+Esto genera una zona segura detrás de determinadas escaleras.
+
+El jugador puede quedarse escondido en esa zona y evitar completamente las estrellas.
+
+Ese comportamiento contradice el diseño previsto.
+
+Comportamiento requerido
+
+Las Estrellas IA deben recorrer SIEMPRE la plataforma completa.
+
+La lógica correcta es:
+
+Recorrer toda la longitud de la plataforma actual.
+Llegar al extremo real de la plataforma.
+Sobrepasar visualmente la zona de escalera.
+Descender únicamente cuando alcancen el extremo definido para esa plataforma.
+Continuar hacia la siguiente plataforma.
+
+Las escaleras:
+
+no alteran la trayectoria,
+no alteran el punto de descenso,
+no funcionan como waypoint,
+no funcionan como punto de cambio de dirección.
+Regla adicional obligatoria
+
+La parte posterior de una escalera nunca debe convertirse en un escondite seguro.
+
+Toda superficie transitable de una plataforma debe poder ser alcanzada por una Estrella IA durante su recorrido.
+
+No debe existir ninguna posición donde el jugador pueda permanecer indefinidamente sin riesgo únicamente aprovechando la ubicación de una escalera.
+
+Criterio de aceptación
+
+Para cada plataforma:
+
+la estrella recorre el 100% de su longitud,
+alcanza el borde extremo,
+recién entonces inicia el descenso,
+la zona detrás de la escalera sigue siendo alcanzada por las estrellas.
+ACTUALIZACIÓN DEL PRD
+
+Modificar el PRD para reflejar exactamente estos cambios.
+
+Actualizar todas las secciones afectadas:
+
+Requisitos Funcionales
+
+Actualizar:
+
+RF-02
+RF-03
+RF-04
+RF-06
+RF-07
+
+o cualquier otro requisito relacionado.
+
+Requisitos Técnicos
+
+Agregar reglas explícitas sobre:
+
+reinicio del sistema de spawn al perder una vida,
+limpieza de enemigos activos durante respawn,
+control exclusivo de salto mediante barra espaciadora,
+recorrido completo de plataformas por parte de las Estrellas IA.
+Sistema de vidas
+
+Actualizar el flujo de pérdida de vida para indicar que:
+
+las Estrellas IA activas se eliminan,
+el sistema de spawn se reinicia,
+el jugador reaparece en un entorno limpio.
+Especificación de Movimiento de Estrellas IA
+
+Actualizar la sección completa para dejar explícito que:
+
+las estrellas recorren la plataforma completa,
+las escaleras no afectan su trayectoria,
+el descenso ocurre únicamente en los extremos definidos de cada plataforma,
+no pueden generarse zonas seguras detrás de escaleras.
+Criterios de Aceptación
+
+Agregar criterios verificables para los tres cambios anteriores.
+
+VALIDACIÓN FINAL
+
+Antes de finalizar:
+
+Buscar contradicciones en el PRD.
+Corregir referencias obsoletas a salto con flecha arriba.
+Verificar que el flujo de respawn y el flujo de generación de estrellas sean consistentes.
+Verificar que el comportamiento descrito para las Estrellas IA coincida con la implementación real.
+Generar un resumen de cambios realizados en código y documentación.
+```
+
+---
+
+## Prompt 26
+**IA:** ChatGPT  
+**Modelo:** GPT-5.5
+
+### Contenido
+
+```text
+Actúa como ingeniero de prompt experto y genera un prompt para comprender y solucionar el bug del recorrido de las estrellas. Se mantuvo el bug de que el humano puede esconderse de las estrellas ia atrás de una escalera porque las estrellas ia bajan antes de la escalera. La solucion es que las estrellas ia recorran hasta el final del canvas aunque se haya terminado la plataforma, pueden pasar sobre las escaleras de la misma forma que atraviesan los huecos de la plataforma y caigan pegadas al borde del canvas para tener una cobertura completa de la linea. 
+Generá el prompt para corregir el bug y que quede reflejado en el archivo prd.
+```
+
+---
+
+## Prompt 27
+**IA:** Cursor  
+**Modelo:** Agent Auto
+
+### Contenido
+
+```text
+Eres un engineer senior en gameplay systems y game design técnico. Tu tarea es analizar y corregir un bug crítico en la lógica de movimiento de enemigos (estrellas IA) en un juego tipo plataforma.
+
+🎯 CONTEXTO DEL PROBLEMA
+
+En el juego, las “estrellas IA” son enemigos que recorren plataformas horizontales y caen por huecos o escaleras, similar a un comportamiento tipo Donkey Kong simplificado.
+
+Actualmente existe el siguiente bug:
+
+El jugador puede “esconderse” detrás de una escalera.
+Esto ocurre porque las estrellas IA bajan por la escalera antes de llegar al final de la plataforma.
+Como resultado, la escalera actúa como un punto de “corte de recorrido” en lugar de ser solo un elemento atravesable.
+Esto genera una zona segura no intencionada, rompiendo la lógica de persecución/recorrido continuo.
+❌ COMPORTAMIENTO ACTUAL INCORRECTO
+Las estrellas IA detectan escaleras como punto de cambio de nivel.
+Abandonan la plataforma antes de recorrer toda su longitud.
+No garantizan cobertura completa del borde del canvas.
+Permiten exploit del jugador: esconderse detrás de escaleras.
+✅ COMPORTAMIENTO ESPERADO (CORRECCIÓN)
+
+Debes modificar la lógica de movimiento de las estrellas IA con estas reglas:
+
+Las estrellas IA deben recorrer siempre toda la plataforma hasta el final del canvas horizontal, independientemente de la presencia de escaleras.
+Las escaleras NO deben interrumpir el recorrido horizontal.
+Las estrellas IA pueden:
+Atravesar escaleras sin interactuar con ellas.
+Atravesar huecos de plataforma como ya ocurre actualmente.
+Solo al llegar al final real de la plataforma/canvas horizontal, pueden:
+Cambiar de nivel
+O caer al siguiente nivel según la lógica existente del juego
+Visualmente y físicamente:
+Deben poder “pisar encima” de escaleras (no colisionar ni desviarse por ellas)
+Deben mantener continuidad de trayectoria horizontal sin cortes
+🧠 REGLA CLAVE DE DISEÑO
+
+Las escaleras son elementos de tránsito del jugador, no decisiones de navegación de la IA.
+
+La IA debe priorizar:
+
+Cobertura completa del nivel
+Recorrido determinista de borde a borde
+Eliminación de zonas seguras explotables
+🛠️ TAREAS DEL AGENTE
+Analizar la lógica actual de movimiento de las estrellas IA.
+Identificar dónde las escaleras están afectando la decisión de pathing.
+Refactorizar la lógica para que:
+Las escaleras sean ignoradas en el eje horizontal
+Solo los bordes del nivel afecten el cambio de dirección o caída
+Asegurar que no se rompa la lógica existente de huecos en plataformas.
+Verificar que el jugador no pueda crear zonas seguras detrás de escaleras.
+📄 ACTUALIZACIÓN DEL PRD
+
+Debes además actualizar el PRD del juego agregando una sección:
+
+“Comportamiento de enemigos (estrellas IA) – reglas de recorrido”
+
+Incluir explícitamente:
+
+Las estrellas IA recorren plataformas de extremo a extremo del canvas.
+Las escaleras no afectan el path horizontal de la IA.
+La IA ignora escaleras para navegación.
+El diseño evita zonas seguras explotables por el jugador.
+Las transiciones de nivel ocurren solo en bordes o lógica de caída, nunca por escaleras.
+🚨 CRITERIO DE VALIDACIÓN
+
+El bug se considera resuelto si:
+
+El jugador NO puede evitar contacto con estrellas escondiéndose detrás de escaleras.
+Las estrellas recorren toda la línea horizontal completa.
+No hay interrupciones de movimiento causadas por escaleras.
+El comportamiento es consistente en todos los niveles.
+🎯 SALIDA ESPERADA
+Explicación del fix aplicado
+Cambios en lógica de movimiento
+Actualización del PRD con la nueva regla de IA
+Confirmación de eliminación del exploit
+
+```
