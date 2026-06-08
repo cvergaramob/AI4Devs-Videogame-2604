@@ -25,42 +25,49 @@ class RebelAI extends Entity {
 
     _buildFragments() {
         const pool = ['01', '10', 'if(', '//', 'NaN', '∞', '!=', 'err', '??', '0x', 'Ω', 'AI', '404'];
-        return Array.from({ length: 10 }, (_, i) => ({
+        const n = Constants.REBEL_AI_FRAGMENT_COUNT;
+        return Array.from({ length: n }, (_, i) => ({
             text:   pool[i % pool.length],
-            angle:  (i / 10) * Math.PI * 2,
-            radius: 34 + (i % 4) * 14,
-            speed:  0.35 + (i % 5) * 0.12,
+            angle:  (i / n) * Math.PI * 2,
+            radius: Constants.REBEL_AI_FRAGMENT_BASE_RADIUS + (i % 4) * Constants.REBEL_AI_FRAGMENT_RADIUS_STEP,
+            speed:  Constants.REBEL_AI_FRAGMENT_BASE_SPEED + (i % 5) * Constants.REBEL_AI_FRAGMENT_SPEED_STEP,
             alpha:  0,
-            phase:  (i / 10) * Math.PI * 2
+            phase:  (i / n) * Math.PI * 2
         }));
     }
 
     update(dt) {
         if (!this.active) return;
         this.time += dt;
-        this._scanlineOffset = (this._scanlineOffset + dt * 120) % Constants.CANVAS_HEIGHT;
+        this._scanlineOffset = (this._scanlineOffset + dt * Constants.REBEL_AI_SCANLINE_SPEED) % Constants.CANVAS_HEIGHT;
 
-        const glitchInterval = Math.max(0.15, 0.8 / this.glitchIntensity);
+        const glitchInterval = Math.max(Constants.REBEL_AI_GLITCH_INTERVAL_MIN,
+            Constants.REBEL_AI_GLITCH_INTERVAL_BASE / this.glitchIntensity);
         this.glitchTimer += dt;
         if (this.glitchTimer > glitchInterval) {
             this.glitchTimer  = 0;
             this.glitchActive = true;
-            const amp = 4 + this.glitchIntensity * 6;
+            const amp = Constants.REBEL_AI_GLITCH_AMP_BASE + this.glitchIntensity * Constants.REBEL_AI_GLITCH_AMP_FACTOR;
             this.glitchOffset = {
                 x: (Math.random() - 0.5) * amp * 2,
                 y: (Math.random() - 0.5) * amp
             };
-        } else if (this.glitchTimer > glitchInterval * 0.15) {
+        } else if (this.glitchTimer > glitchInterval * Constants.REBEL_AI_GLITCH_DURATION_RATIO) {
             this.glitchActive = false;
         }
 
         for (const f of this._fragments) {
             f.angle += f.speed * dt * this.glitchIntensity;
-            f.alpha = 0.35 + 0.45 * Math.sin(this.time * 2.5 * this.glitchIntensity + f.phase);
+            f.alpha = Math.max(0, Math.min(1,
+                Constants.REBEL_AI_FRAGMENT_ALPHA_BASE +
+                Constants.REBEL_AI_FRAGMENT_ALPHA_AMP * Math.sin(
+                    this.time * Constants.REBEL_AI_FRAGMENT_PULSE_SPEED * this.glitchIntensity + f.phase
+                )
+            ));
         }
 
         if (this.isShuttingDown) {
-            const rate = 0.5 + this.glitchIntensity * 0.4;
+            const rate = Constants.REBEL_AI_SHUTDOWN_RATE_BASE + this.glitchIntensity * Constants.REBEL_AI_SHUTDOWN_RATE_FACTOR;
             this.shutdownProgress += dt * rate;
             if (this.shutdownProgress >= 1) {
                 this.shutdownProgress = 1;
@@ -76,7 +83,7 @@ class RebelAI extends Entity {
         const cx = this.x + this.width  / 2;
         const cy = this.y + this.height / 2;
 
-        if (this.glitchActive && this.glitchIntensity > 1.2) {
+        if (this.glitchActive && this.glitchIntensity > Constants.REBEL_AI_RGB_SPLIT_THRESHOLD) {
             this._renderRGBSplit(ctx, cx, cy);
         }
 
@@ -95,7 +102,7 @@ class RebelAI extends Entity {
     _renderRGBSplit(ctx, cx, cy) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = 0.25 * this.glitchIntensity;
+        ctx.globalAlpha = Constants.REBEL_AI_RGB_SPLIT_ALPHA * this.glitchIntensity;
         ctx.translate(this.glitchOffset.x * 0.5, 0);
         ctx.fillStyle = '#ff00ff';
         ctx.fillRect(this.x - 8, this.y, this.width + 16, this.height);
@@ -106,11 +113,11 @@ class RebelAI extends Entity {
     }
 
     _renderCorruptPixels(ctx, cx, cy) {
-        const count = Math.floor(12 + this.glitchIntensity * 14);
-        const radius = 28 + this.glitchIntensity * 35;
+        const count = Math.floor(Constants.REBEL_AI_CORRUPT_COUNT_BASE + this.glitchIntensity * Constants.REBEL_AI_CORRUPT_COUNT_FACTOR);
+        const radius = Constants.REBEL_AI_CORRUPT_RADIUS_BASE + this.glitchIntensity * Constants.REBEL_AI_CORRUPT_RADIUS_FACTOR;
         for (let i = 0; i < count; i++) {
             const angle  = Math.random() * Math.PI * 2;
-            const dist   = 16 + Math.random() * radius;
+            const dist   = Constants.REBEL_AI_CORRUPT_DIST_MIN + Math.random() * radius;
             const px     = cx + Math.cos(angle) * dist;
             const py     = cy + Math.sin(angle) * dist;
             const colors = ['#ff00ff', '#00ffff', '#7b2fff', '#ff0088', '#ffee00'];
@@ -123,23 +130,23 @@ class RebelAI extends Entity {
     }
 
     _renderCore(ctx, cx, cy) {
-        const pulse  = 1 + 0.14 * Math.sin(this.time * 3.5 * this.glitchIntensity);
-        const radius = (this.width * 0.38) * pulse * (1 - this.shutdownProgress * 0.35);
+        const pulse  = 1 + Constants.REBEL_AI_CORE_PULSE_AMP * Math.sin(this.time * Constants.REBEL_AI_CORE_PULSE_SPEED * this.glitchIntensity);
+        const radius = (this.width * Constants.REBEL_AI_CORE_RADIUS_FACTOR) * pulse * (1 - this.shutdownProgress * 0.35);
 
-        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 2.4);
+        const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * Constants.REBEL_AI_CORE_GLOW_FACTOR);
         glow.addColorStop(0,   Constants.COLOR_AI_PRIMARY + 'cc');
         glow.addColorStop(0.5, Constants.COLOR_AI_PRIMARY + '55');
         glow.addColorStop(1,   Constants.COLOR_AI_PRIMARY + '00');
         ctx.fillStyle   = glow;
         ctx.globalAlpha = 0.85;
         ctx.beginPath();
-        ctx.arc(cx, cy, radius * 2.4, 0, Math.PI * 2);
+        ctx.arc(cx, cy, radius * Constants.REBEL_AI_CORE_GLOW_FACTOR, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.globalAlpha = 1 - this.shutdownProgress * 0.6;
         ctx.fillStyle   = Constants.COLOR_AI_PRIMARY;
         ctx.shadowColor = Constants.COLOR_AI_PRIMARY;
-        ctx.shadowBlur  = 14 + this.glitchIntensity * 8;
+        ctx.shadowBlur  = Constants.REBEL_AI_CORE_SHADOW_BASE + this.glitchIntensity * Constants.REBEL_AI_CORE_SHADOW_FACTOR;
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
@@ -169,14 +176,15 @@ class RebelAI extends Entity {
     }
 
     _renderEye(ctx, cx, cy) {
-        if (this.shutdownProgress > 0.7) return;
+        if (this.shutdownProgress > Constants.REBEL_AI_SHUTDOWN_FADE_THRESHOLD) return;
 
         const flicker = this.isShuttingDown ? Math.random() > 0.5 : 1;
         if (!flicker) return;
 
-        const oscillateX = Math.sin(this.time * 2.2 * this.glitchIntensity) * (7 + this.glitchIntensity * 2);
-        const eyeW = 22;
-        const eyeH = 10;
+        const oscillateX = Math.sin(this.time * Constants.REBEL_AI_EYE_OSC_SPEED * this.glitchIntensity) *
+            (Constants.REBEL_AI_EYE_OSC_AMP_BASE + this.glitchIntensity * Constants.REBEL_AI_EYE_OSC_AMP_FACTOR);
+        const eyeW = Constants.REBEL_AI_EYE_W;
+        const eyeH = Constants.REBEL_AI_EYE_H;
 
         ctx.strokeStyle = '#00ffff';
         ctx.lineWidth   = 2;
@@ -190,13 +198,13 @@ class RebelAI extends Entity {
 
         ctx.fillStyle = '#00ffff';
         ctx.beginPath();
-        ctx.ellipse(cx + oscillateX, cy + 2, 5, eyeH * 0.7, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + oscillateX, cy + 2, Constants.REBEL_AI_EYE_PUPIL_W, eyeH * 0.7, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
     }
 
     _renderCodeFragments(ctx, cx, cy) {
-        ctx.font         = 'bold 10px monospace';
+        ctx.font         = Constants.REBEL_AI_FRAGMENT_FONT;
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
 
@@ -206,7 +214,7 @@ class RebelAI extends Entity {
             const fy = cy + Math.sin(f.angle) * f.radius;
 
             ctx.fillStyle   = Math.floor(f.angle * 3) % 2 === 0 ? '#ff00ff' : '#00ffff';
-            ctx.globalAlpha = f.alpha * (1 - this.shutdownProgress * 0.8);
+            ctx.globalAlpha = Math.max(0, Math.min(1, f.alpha * (1 - this.shutdownProgress * 0.8)));
             ctx.fillText(f.text, fx, fy);
         }
         ctx.globalAlpha = 1;
@@ -215,8 +223,8 @@ class RebelAI extends Entity {
     _renderShutdown(ctx, cx, cy) {
         const p = this.shutdownProgress;
 
-        for (let i = 0; i < 6; i++) {
-            const y = (this._scanlineOffset + i * 18) % (this.height + 20) + this.y - 10;
+        for (let i = 0; i < Constants.REBEL_AI_SHUTDOWN_SCANLINES; i++) {
+            const y = (this._scanlineOffset + i * Constants.REBEL_AI_SHUTDOWN_SCANLINE_SPACING) % (this.height + 20) + this.y - 10;
             ctx.fillStyle   = i % 2 === 0 ? '#ff00ff' : '#00ffff';
             ctx.globalAlpha = p * 0.12 * this.glitchIntensity;
             ctx.fillRect(this.x - 12, y, this.width + 24, 2);
@@ -238,7 +246,7 @@ class RebelAI extends Entity {
         ctx.lineTo(this.x + this.width, cy);
         ctx.stroke();
 
-        ctx.font         = 'bold 11px monospace';
+        ctx.font         = Constants.REBEL_AI_SHUTDOWN_FONT;
         ctx.textAlign    = 'center';
         ctx.fillStyle    = '#ff4444';
         ctx.globalAlpha  = Math.min(1, p * 1.5);

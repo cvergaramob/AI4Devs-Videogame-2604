@@ -106,7 +106,7 @@ class Player extends Entity {
 
         if (this.isClimbing) {
             // ── CLIMBING: velocidad vertical, sin movimiento horizontal ────────
-            const climbSpeed = Constants.PLAYER_SPEED * 0.7;
+            const climbSpeed = Constants.PLAYER_SPEED * Constants.PLAYER_CLIMB_MULTIPLIER;
             if (this.inputClimbUp)        this.velocityY = -climbSpeed;
             else if (this.inputClimbDown) this.velocityY =  climbSpeed;
             else                          this.velocityY =  0;
@@ -160,14 +160,15 @@ class Player extends Entity {
         // ── Aura de protección ────────────────────────────────────────────────
         if (this.protectionActive) {
             const blink = this.protectionTimer < Constants.PROTECTION_BLINK_THRESHOLD &&
-                          Math.floor(Date.now() / 150) % 2 === 0;
+                          Math.floor(Date.now() / Constants.PLAYER_PROTECTION_BLINK_MS) % 2 === 0;
             if (!blink) {
                 ctx.save();
                 ctx.shadowColor = Constants.COLOR_PROTECTION_AURA;
-                ctx.shadowBlur  = 14;
+                ctx.shadowBlur  = Constants.PLAYER_AURA_SHADOW_BLUR;
                 ctx.fillStyle   = Constants.COLOR_PROTECTION_AURA;
-                ctx.globalAlpha = 0.25;
-                ctx.fillRect(cb.x - 10, cb.y - 10, cb.width + 20, cb.height + 20);
+                ctx.globalAlpha = Constants.PLAYER_AURA_ALPHA;
+                const pad = Constants.PLAYER_AURA_PADDING;
+                ctx.fillRect(cb.x - pad, cb.y - pad, cb.width + pad * 2, cb.height + pad * 2);
                 ctx.globalAlpha = 1;
                 ctx.shadowBlur  = 0;
                 ctx.restore();
@@ -177,7 +178,7 @@ class Player extends Entity {
         ctx.save();
 
         const bounceY = this.isCelebrating
-            ? Math.sin(this.celebrationTime * 8) * 4
+            ? Math.sin(this.celebrationTime * Constants.PLAYER_CELEBRATION_BOUNCE_SPEED) * Constants.PLAYER_CELEBRATION_BOUNCE_AMP
             : 0;
         if (bounceY !== 0) {
             ctx.translate(0, bounceY);
@@ -191,9 +192,9 @@ class Player extends Entity {
         ctx.strokeRect(cb.x, cb.y, cb.width, cb.height);
 
         // ── Ojos ──────────────────────────────────────────────────────────────
-        ctx.fillStyle = '#000';
-        const eyeY   = cb.y + 8;
-        const eyeSize = 3;
+        ctx.fillStyle = Constants.PLAYER_EYE_COLOR;
+        const eyeY   = cb.y + Constants.PLAYER_EYE_Y_OFFSET;
+        const eyeSize = Constants.PLAYER_EYE_SIZE;
         if (this.facingRight) {
             ctx.fillRect(cb.x + cb.width - 10, eyeY, eyeSize, eyeSize);
             ctx.fillRect(cb.x + cb.width - 4,  eyeY, eyeSize, eyeSize);
@@ -205,14 +206,15 @@ class Player extends Entity {
         // ── Pies parpadeantes al correr ───────────────────────────────────────
         if (this.isCelebrating) {
             ctx.fillStyle = Constants.COLOR_PLAYER_OUTLINE;
-            const armWave = Math.sin(this.celebrationTime * 10) * 3;
-            ctx.fillRect(cb.x - 6, cb.y + 6 + armWave, 5, 14);
-            ctx.fillRect(cb.x + cb.width + 1, cb.y + 6 - armWave, 5, 14);
+            const armWave = Math.sin(this.celebrationTime * Constants.PLAYER_CELEBRATION_ARM_SPEED) * Constants.PLAYER_CELEBRATION_ARM_AMP;
+            ctx.fillRect(cb.x - 6, cb.y + 6 + armWave, Constants.PLAYER_ARM_W, Constants.PLAYER_ARM_H);
+            ctx.fillRect(cb.x + cb.width + 1, cb.y + 6 - armWave, Constants.PLAYER_ARM_W, Constants.PLAYER_ARM_H);
         } else if (this.isGrounded && this.velocityX !== 0) {
-            const legPhase = Math.floor(this.animTime * 10) % 2;
+            const legPhase = Math.floor(this.animTime * Constants.PLAYER_LEG_ANIM_SPEED) % 2;
+            const legSize = Constants.PLAYER_LEG_SIZE;
             ctx.fillStyle = Constants.COLOR_PLAYER_OUTLINE;
-            ctx.fillRect(cb.x + (legPhase ? 2 : 8),  cb.y + cb.height - 4, 4, 4);
-            ctx.fillRect(cb.x + (legPhase ? 8 : 2),  cb.y + cb.height - 4, 4, 4);
+            ctx.fillRect(cb.x + (legPhase ? 2 : 8), cb.y + cb.height - legSize, legSize, legSize);
+            ctx.fillRect(cb.x + (legPhase ? 8 : 2), cb.y + cb.height - legSize, legSize, legSize);
         }
 
         ctx.restore();

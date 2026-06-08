@@ -18,7 +18,7 @@ class GreenOrb extends Entity {
     update(dt) {
         if (!this.active) return;
 
-        this.pulsePhase += dt * 3;
+        this.pulsePhase += dt * Constants.ORB_PULSE_SPEED;
     }
 
     /**
@@ -30,12 +30,12 @@ class GreenOrb extends Entity {
         const centerX = this.x + Constants.ORB_RADIUS;
         const centerY = this.y + Constants.ORB_RADIUS;
         const radius = Constants.ORB_RADIUS;
-        const pulse = Math.sin(this.pulsePhase) * 0.2 + 0.8;
+        const pulse = Math.sin(this.pulsePhase) * Constants.ORB_PULSE_AMP + Constants.ORB_PULSE_BASE;
 
         // Glow
         const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * 2);
-        gradient.addColorStop(0, Constants.COLOR_ORB_GLOW + '88');
-        gradient.addColorStop(1, Constants.COLOR_ORB_GLOW + '00');
+        gradient.addColorStop(0, Constants.COLOR_ORB_GLOW + Constants.ORB_GLOW_ALPHA_INNER);
+        gradient.addColorStop(1, Constants.COLOR_ORB_GLOW + Constants.ORB_GLOW_ALPHA_OUTER);
         ctx.fillStyle = gradient;
         ctx.fillRect(centerX - radius * 2, centerY - radius * 2, radius * 4, radius * 4);
 
@@ -49,7 +49,7 @@ class GreenOrb extends Entity {
 
         // Contorno
         ctx.strokeStyle = Constants.COLOR_ORB_GLOW;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = Constants.ORB_LINE_WIDTH;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.stroke();

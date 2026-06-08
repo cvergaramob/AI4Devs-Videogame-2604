@@ -24,7 +24,7 @@ Arcade de plataformas inspirado en Donkey Kong, desarrollado completamente en **
 
 ## 📁 Estructura de Archivos
 
-```
+```text
 ai-kong-CV/
 ├── index.html                  # Entry point
 ├── style.css                   # Estilos CSS
@@ -129,7 +129,7 @@ COLOR_ORB: '#00ff00'
 - **Estrellas IA**: Magenta/Azul (#ff00ff, #0088ff)
 - **Esferas**: Verde (#00ff00)
 - **IA**: Rojo (#ff0000) con glitches cian/amarillo
-- **Escaleras**: Verde (activo), Naranja (advertencia), Gris (desactivo)
+- **Escaleras**: Magenta/violeta (activo), Naranja (advertencia), Gris (desactivo) — distintas de las esferas verdes de inmunidad
 
 ## 🚀 Cómo Ejecutar
 
@@ -159,7 +159,7 @@ Simplemente abre `index.html` directamente en el navegador. **Nota**: Algunos na
 ✅ Sistemas de física, colisiones AABB, spawn, protección, puntuación, timer  
 ✅ UI completa: HUD, menú, pantalla de victoria, game over  
 ✅ Animaciones: glitches IA, pulsación estrellas, parpadeo protección  
-✅ Responsivo: canvas escala a diferentes resoluciones  
+✅ Canvas fijo: 960×640 px (sin escalado responsive)  
 
 ## 🐛 Debug
 

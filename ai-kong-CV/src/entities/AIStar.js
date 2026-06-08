@@ -6,7 +6,7 @@
 
 class AIStar extends Entity {
     constructor() {
-        super(0, 0, 40, 40);
+        super(0, 0, Constants.STAR_GROUP_SIZE, Constants.STAR_GROUP_SIZE);
         this.starCount = 0;
         this.platforms = [];
         this.platformIndex = 0;
@@ -33,7 +33,7 @@ class AIStar extends Entity {
         super.init();
         this.x = x;
         this.y = y;
-        this.starCount = Math.max(2, Math.min(4, starCount));
+        this.starCount = Math.max(Constants.STAR_COUNT_MIN, Math.min(Constants.STAR_COUNT_MAX, starCount));
         this.platforms = platforms;
         this.platformIndex = platformIndex;
         this.direction = direction;
@@ -42,25 +42,25 @@ class AIStar extends Entity {
         this.velocityY = 0;
         this.lifetime = 0;
         this.pulsePhase = 0;
-        this.width = 40;
-        this.height = 40;
+        this.width = Constants.STAR_GROUP_SIZE;
+        this.height = Constants.STAR_GROUP_SIZE;
         this._trail = [];
-        this._launchFlash = 0.35;
+        this._launchFlash = Constants.STAR_LAUNCH_FLASH;
         this._particles = this._buildLaunchParticles();
         this._snapToPlatformSurface();
     }
 
     _buildLaunchParticles() {
         const particles = [];
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < Constants.STAR_PARTICLE_COUNT; i++) {
             particles.push({
                 x: 0,
                 y: 0,
-                vx: (Math.random() - 0.5) * 120,
-                vy: Math.random() * 80 + 40,
-                life: 0.25 + Math.random() * 0.2,
-                maxLife: 0.45,
-                size: 2 + Math.random() * 3,
+                vx: (Math.random() - 0.5) * Constants.STAR_PARTICLE_VEL_X,
+                vy: Math.random() * Constants.STAR_PARTICLE_VEL_Y_MAX + Constants.STAR_PARTICLE_VEL_Y_MIN,
+                life: Constants.STAR_PARTICLE_LIFE_MIN + Math.random() * Constants.STAR_PARTICLE_LIFE_MAX,
+                maxLife: Constants.STAR_PARTICLE_MAX_LIFE,
+                size: Constants.STAR_PARTICLE_SIZE_MIN + Math.random() * Constants.STAR_PARTICLE_SIZE_MAX,
                 color: i % 2 === 0 ? Constants.COLOR_STAR_1 : Constants.COLOR_STAR_3
             });
         }
@@ -71,7 +71,7 @@ class AIStar extends Entity {
         if (!this.active || !this.platforms.length) return;
 
         this.lifetime += dt;
-        this.pulsePhase += dt * 4;
+        this.pulsePhase += dt * Constants.STAR_PULSE_SPEED;
         this._launchFlash = Math.max(0, this._launchFlash - dt);
         this._updateVisualEffects(dt);
 
@@ -96,9 +96,9 @@ class AIStar extends Entity {
         const cx = this.x + this.width / 2;
         const cy = this.y + this.height / 2;
         this._trail.push({ x: cx, y: cy, alpha: 1 });
-        if (this._trail.length > 12) this._trail.shift();
+        if (this._trail.length > Constants.STAR_TRAIL_MAX) this._trail.shift();
         for (const t of this._trail) {
-            t.alpha -= dt * 2.2;
+            t.alpha -= dt * Constants.STAR_TRAIL_FADE_SPEED;
         }
         while (this._trail.length && this._trail[0].alpha <= 0) {
             this._trail.shift();
@@ -108,7 +108,7 @@ class AIStar extends Entity {
             p.life -= dt;
             p.x += p.vx * dt;
             p.y += p.vy * dt;
-            p.vy += 200 * dt;
+            p.vy += Constants.STAR_PARTICLE_GRAVITY * dt;
         }
         this._particles = this._particles.filter(p => p.life > 0);
     }
@@ -189,20 +189,21 @@ class AIStar extends Entity {
         this._renderLaunchEffects(ctx, centerX, centerY);
 
         // Resplandor de proyectil
-        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 36);
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Constants.STAR_GLOW_RADIUS);
         gradient.addColorStop(0, Constants.COLOR_STAR_GLOW + '66');
         gradient.addColorStop(0.5, Constants.COLOR_STAR_GLOW + '22');
         gradient.addColorStop(1, Constants.COLOR_STAR_GLOW + '00');
         ctx.fillStyle = gradient;
-        ctx.fillRect(centerX - 36, centerY - 36, 72, 72);
+        const glowD = Constants.STAR_GLOW_RADIUS * 2;
+        ctx.fillRect(centerX - Constants.STAR_GLOW_RADIUS, centerY - Constants.STAR_GLOW_RADIUS, glowD, glowD);
 
         // Núcleo energético (proyectil)
         ctx.fillStyle = Constants.COLOR_STAR_2;
         ctx.globalAlpha = pulse;
         ctx.shadowColor = Constants.COLOR_STAR_GLOW;
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = Constants.STAR_CORE_SHADOW_BLUR;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 6, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, Constants.STAR_CORE_RADIUS, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -228,13 +229,13 @@ class AIStar extends Entity {
         for (let i = 1; i < this._trail.length; i++) {
             const prev = this._trail[i - 1];
             const curr = this._trail[i];
-            const alpha = Math.max(0, curr.alpha) * 0.55;
-            const width = 2 + (i / this._trail.length) * 10;
+            const alpha = Math.max(0, curr.alpha) * Constants.STAR_TRAIL_ALPHA_FACTOR;
+            const width = Constants.STAR_TRAIL_WIDTH_MIN + (i / this._trail.length) * Constants.STAR_TRAIL_WIDTH_MAX;
 
             ctx.strokeStyle = `rgba(255, 0, 255, ${alpha})`;
             ctx.lineWidth = width;
             ctx.shadowColor = '#0088ff';
-            ctx.shadowBlur = 8;
+            ctx.shadowBlur = Constants.STAR_TRAIL_SHADOW_BLUR;
             ctx.beginPath();
             ctx.moveTo(prev.x, prev.y);
             ctx.lineTo(curr.x, curr.y);
@@ -242,7 +243,9 @@ class AIStar extends Entity {
         }
 
         // Estela direccional principal
-        const tailLen = 28 + Math.abs(this.velocityX) * 0.08 + Math.abs(this.velocityY) * 0.08;
+        const tailLen = Constants.STAR_STREAK_LEN_BASE +
+            Math.abs(this.velocityX) * Constants.STAR_STREAK_VEL_FACTOR +
+            Math.abs(this.velocityY) * Constants.STAR_STREAK_VEL_FACTOR;
         const tx = centerX - Math.cos(moveAngle) * tailLen;
         const ty = centerY - Math.sin(moveAngle) * tailLen;
         const streak = ctx.createLinearGradient(tx, ty, centerX, centerY);
@@ -250,7 +253,7 @@ class AIStar extends Entity {
         streak.addColorStop(0.4, 'rgba(255, 0, 255, 0.35)');
         streak.addColorStop(1, 'rgba(255, 0, 136, 0.85)');
         ctx.strokeStyle = streak;
-        ctx.lineWidth = 14;
+        ctx.lineWidth = Constants.STAR_STREAK_WIDTH;
         ctx.shadowBlur = 0;
         ctx.beginPath();
         ctx.moveTo(tx, ty);
@@ -263,21 +266,23 @@ class AIStar extends Entity {
     _renderLaunchEffects(ctx, centerX, centerY) {
         if (this._launchFlash > 0) {
             ctx.save();
-            ctx.globalAlpha = this._launchFlash * 2.5;
+            ctx.globalAlpha = this._launchFlash * Constants.STAR_LAUNCH_FLASH_ALPHA;
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 18 + (0.35 - this._launchFlash) * 30, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY,
+                Constants.STAR_LAUNCH_FLASH_RADIUS + (Constants.STAR_LAUNCH_FLASH - this._launchFlash) * Constants.STAR_LAUNCH_FLASH_RADIUS_SCALE,
+                0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
 
-        const originX = centerX - this.direction * 22;
+        const originX = centerX - this.direction * Constants.STAR_LAUNCH_ORIGIN_OFFSET;
         for (const p of this._particles) {
             ctx.save();
             ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
             ctx.fillStyle = p.color;
             ctx.shadowColor = p.color;
-            ctx.shadowBlur = 6;
+            ctx.shadowBlur = Constants.STAR_LAUNCH_PARTICLE_SHADOW;
             ctx.beginPath();
             ctx.arc(originX + p.x, centerY + p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
@@ -290,7 +295,7 @@ class AIStar extends Entity {
         const angle = (Math.PI * 2) / count;
         for (let i = 0; i < count; i++) {
             const a = angle * i;
-            const distance = 8 + i * 2;
+            const distance = Constants.STAR_POSITION_DIST_BASE + i * Constants.STAR_POSITION_DIST_STEP;
             positions.push({
                 x: centerX + Math.cos(a) * distance,
                 y: centerY + Math.sin(a) * distance
@@ -315,10 +320,10 @@ class AIStar extends Entity {
 
     getBounds() {
         return {
-            x: this.x + 5,
-            y: this.y + 5,
-            width: this.width - 10,
-            height: this.height - 10
+            x: this.x + Constants.STAR_COLLISION_SHRINK,
+            y: this.y + Constants.STAR_COLLISION_SHRINK,
+            width: this.width - Constants.STAR_COLLISION_SHRINK * 2,
+            height: this.height - Constants.STAR_COLLISION_SHRINK * 2
         };
     }
 

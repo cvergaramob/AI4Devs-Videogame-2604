@@ -70,8 +70,10 @@ class Game {
         // Event listeners
         this._setupEventListeners();
 
+        this.loadingTimeout = null;
+
         // Iniciar
-        this.stateMachine.setState(Constants.GAME_STATE.MENU);
+        this.stateMachine.setState(Constants.GAME_STATE.LOADING);
         this.gameLoop.start();
     }
 
@@ -141,8 +143,20 @@ class Game {
 
     _setupStateMachine() {
         this.stateMachine.addState(Constants.GAME_STATE.LOADING, {
-            onEnter:  () => console.log('[Game] → LOADING'),
-            onUpdate: () => setTimeout(() => this.stateMachine.setState(Constants.GAME_STATE.MENU), 100)
+            onEnter: () => {
+                console.log('[Game] → LOADING');
+                this.loadingTimeout = setTimeout(
+                    () => this.stateMachine.setState(Constants.GAME_STATE.MENU),
+                    Constants.LOADING_TO_MENU_DELAY_MS
+                );
+            },
+            onExit: () => {
+                if (this.loadingTimeout !== null) {
+                    clearTimeout(this.loadingTimeout);
+                    this.loadingTimeout = null;
+                }
+            },
+            onUpdate: () => {}
         });
 
         this.stateMachine.addState(Constants.GAME_STATE.MENU, {
@@ -548,7 +562,7 @@ class Game {
 
         if (this.lifeLostSequence.pendingGameOver) {
             this.gameActive = false;
-            setTimeout(() => this.stateMachine.setState(Constants.GAME_STATE.GAME_OVER), 500);
+            setTimeout(() => this.stateMachine.setState(Constants.GAME_STATE.GAME_OVER), Constants.GAME_OVER_DELAY_MS);
             return;
         }
 
@@ -585,7 +599,8 @@ class Game {
             );
 
             if (this.victorySequence.active) {
-                const intensity = 1 + this.victorySequence.elapsed / 2;
+                const intensity = Constants.VICTORY_CORRUPTION_INTENSITY_BASE +
+                    this.victorySequence.elapsed / Constants.VICTORY_CORRUPTION_INTENSITY_SCALE;
                 this.renderer.renderVictoryCorruptionOverlay(
                     ctx, intensity, this.victorySequence.elapsed
                 );
@@ -617,70 +632,77 @@ class Game {
 
     _renderLifeLostOverlay(ctx) {
         ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 10, 0.72)';
+        ctx.fillStyle = Constants.LIFE_LOST_OVERLAY_BG;
         ctx.fillRect(0, 0, Constants.CANVAS_WIDTH, Constants.CANVAS_HEIGHT);
 
-        const bw = 420;
-        const bh = 130;
+        const bw = Constants.LIFE_LOST_PANEL_W;
+        const bh = Constants.LIFE_LOST_PANEL_H;
         const bx = (Constants.CANVAS_WIDTH - bw) / 2;
         const by = (Constants.CANVAS_HEIGHT - bh) / 2;
 
-        ctx.fillStyle   = 'rgba(10, 0, 20, 0.92)';
+        ctx.fillStyle   = Constants.LIFE_LOST_PANEL_BG;
         ctx.fillRect(bx, by, bw, bh);
-        ctx.strokeStyle = '#ff3aff';
+        ctx.strokeStyle = Constants.LIFE_LOST_PANEL_BORDER;
         ctx.lineWidth   = 2;
         ctx.strokeRect(bx, by, bw, bh);
 
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font         = 'bold 36px monospace';
-        ctx.fillStyle    = '#ff4466';
-        ctx.fillText('VIDA PERDIDA', Constants.CANVAS_WIDTH / 2, Constants.CANVAS_HEIGHT / 2 - 22);
+        ctx.font         = Constants.LIFE_LOST_TITLE_FONT;
+        ctx.fillStyle    = Constants.LIFE_LOST_TITLE_COLOR;
+        ctx.fillText('VIDA PERDIDA', Constants.CANVAS_WIDTH / 2,
+            Constants.CANVAS_HEIGHT / 2 + Constants.LIFE_LOST_TITLE_Y_OFFSET);
 
-        ctx.font      = 'bold 18px monospace';
-        ctx.fillStyle = this.lives > 0 ? '#00eeff' : '#ff8888';
+        ctx.font      = Constants.LIFE_LOST_MSG_FONT;
+        ctx.fillStyle = this.lives > 0 ? Constants.LIFE_LOST_MSG_COLOR_ACTIVE : Constants.LIFE_LOST_MSG_COLOR_LAST;
         const livesMsg = this.lives === 1
             ? 'TE QUEDA 1 VIDA'
             : this.lives > 1
                 ? `TE QUEDAN ${this.lives} VIDAS`
                 : 'SIN VIDAS RESTANTES';
-        ctx.fillText(livesMsg, Constants.CANVAS_WIDTH / 2, Constants.CANVAS_HEIGHT / 2 + 24);
+        ctx.fillText(livesMsg, Constants.CANVAS_WIDTH / 2,
+            Constants.CANVAS_HEIGHT / 2 + Constants.LIFE_LOST_MSG_Y_OFFSET);
         ctx.restore();
     }
 
     _renderPauseOverlay(ctx) {
         ctx.save();
-        ctx.fillStyle = 'rgba(0,0,10,0.65)';
+        ctx.fillStyle = Constants.PAUSE_OVERLAY_BG;
         ctx.fillRect(0, 0, Constants.CANVAS_WIDTH, Constants.CANVAS_HEIGHT);
 
-        const bw = 360, bh = 140;
+        const bw = Constants.PAUSE_PANEL_W;
+        const bh = Constants.PAUSE_PANEL_H;
         const bx = (Constants.CANVAS_WIDTH - bw) / 2;
         const by = (Constants.CANVAS_HEIGHT - bh) / 2;
-        ctx.fillStyle   = 'rgba(10,0,20,0.9)';
+        ctx.fillStyle   = Constants.PAUSE_PANEL_BG;
         ctx.fillRect(bx, by, bw, bh);
-        ctx.strokeStyle = '#7b2fff';
+        ctx.strokeStyle = Constants.PAUSE_PANEL_BORDER;
         ctx.lineWidth   = 2;
         ctx.strokeRect(bx, by, bw, bh);
 
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font         = 'bold 40px monospace';
-        ctx.fillStyle    = '#00eeff';
-        ctx.fillText('PAUSADO', Constants.CANVAS_WIDTH / 2, Constants.CANVAS_HEIGHT / 2 - 22);
-        ctx.font      = '16px monospace';
-        ctx.fillStyle = '#7b2fff';
-        ctx.fillText('Presiona ESC para continuar', Constants.CANVAS_WIDTH / 2, Constants.CANVAS_HEIGHT / 2 + 24);
+        ctx.font         = Constants.PAUSE_TITLE_FONT;
+        ctx.fillStyle    = Constants.PAUSE_TITLE_COLOR;
+        ctx.fillText('PAUSADO', Constants.CANVAS_WIDTH / 2,
+            Constants.CANVAS_HEIGHT / 2 + Constants.PAUSE_TITLE_Y_OFFSET);
+        ctx.font      = Constants.PAUSE_MSG_FONT;
+        ctx.fillStyle = Constants.PAUSE_MSG_COLOR;
+        ctx.fillText('Presiona ESC para continuar', Constants.CANVAS_WIDTH / 2,
+            Constants.CANVAS_HEIGHT / 2 + Constants.PAUSE_MSG_Y_OFFSET);
         ctx.restore();
     }
 
     _renderFPS(ctx) {
         const fps = this.gameLoop.getFPS();
         ctx.save();
-        ctx.font          = '11px monospace';
-        ctx.fillStyle     = fps >= 55 ? '#00ff88' : '#ff4444';
+        ctx.font          = Constants.FPS_DISPLAY_FONT;
+        ctx.fillStyle     = fps >= Constants.FPS_GOOD_THRESHOLD ? Constants.FPS_GOOD_COLOR : Constants.FPS_BAD_COLOR;
         ctx.textAlign     = 'right';
         ctx.textBaseline  = 'bottom';
-        ctx.fillText(`${fps} FPS`, Constants.CANVAS_WIDTH - 8, Constants.CANVAS_HEIGHT - 6);
+        ctx.fillText(`${fps} FPS`,
+            Constants.CANVAS_WIDTH - Constants.FPS_X_OFFSET,
+            Constants.CANVAS_HEIGHT - Constants.FPS_Y_OFFSET);
         ctx.restore();
     }
 
@@ -689,20 +711,21 @@ class Game {
         ctx.save();
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font         = 'bold 22px monospace';
+        ctx.font         = Constants.VICTORY_BANNER_FONT;
 
         if (t < Constants.VICTORY_GLITCH_DURATION) {
             ctx.fillStyle = Constants.COLOR_AI_GLITCH_2;
-            ctx.globalAlpha = 0.7 + Math.sin(t * 12) * 0.3;
-            ctx.fillText('CORRUPCIÓN CRÍTICA', Constants.CANVAS_WIDTH / 2, 56);
+            ctx.globalAlpha = Constants.VICTORY_BANNER_GLITCH_ALPHA_BASE +
+                Math.sin(t * Constants.VICTORY_BANNER_GLITCH_SPEED) * Constants.VICTORY_BANNER_GLITCH_ALPHA_AMP;
+            ctx.fillText('CORRUPCIÓN CRÍTICA', Constants.CANVAS_WIDTH / 2, Constants.VICTORY_BANNER_Y);
         } else if (t < Constants.VICTORY_GLITCH_DURATION + Constants.VICTORY_SHUTDOWN_DURATION) {
-            ctx.fillStyle = '#ff4444';
-            ctx.globalAlpha = 0.85;
-            ctx.fillText('APAGANDO IA...', Constants.CANVAS_WIDTH / 2, 56);
+            ctx.fillStyle = Constants.VICTORY_BANNER_SHUTDOWN_COLOR;
+            ctx.globalAlpha = Constants.VICTORY_BANNER_SHUTDOWN_ALPHA;
+            ctx.fillText('APAGANDO IA...', Constants.CANVAS_WIDTH / 2, Constants.VICTORY_BANNER_Y);
         } else {
             ctx.fillStyle = Constants.COLOR_TEXT_VICTORY;
-            ctx.globalAlpha = 0.9;
-            ctx.fillText('¡OBJETIVO CUMPLIDO!', Constants.CANVAS_WIDTH / 2, 56);
+            ctx.globalAlpha = Constants.VICTORY_BANNER_SUCCESS_ALPHA;
+            ctx.fillText('¡OBJETIVO CUMPLIDO!', Constants.CANVAS_WIDTH / 2, Constants.VICTORY_BANNER_Y);
         }
 
         ctx.globalAlpha = 1;

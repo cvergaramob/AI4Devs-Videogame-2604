@@ -6,7 +6,7 @@
 
 class SpawnSystem {
     constructor() {
-        this.starPool = new ObjectPool(AIStar, 20);
+        this.starPool = new ObjectPool(AIStar, Constants.STAR_POOL_SIZE);
         this.platforms = [];
         this.timeSinceLastSpawn = 0;
         this.firstSpawn = true;
@@ -34,7 +34,11 @@ class SpawnSystem {
             this.timeSinceLastSpawn = 0;
         }
 
-        this.activeStars = this.activeStars.filter(star => star.active);
+        for (const star of this.activeStars.slice()) {
+            if (!star.active) {
+                this.destroyStar(star);
+            }
+        }
     }
 
     _spawnStar() {
@@ -43,8 +47,8 @@ class SpawnSystem {
         const platformIndex = Constants.STAR_SPAWN_PLATFORM_INDEX;
         const platform = this.platforms[platformIndex];
         const direction = Constants.STAR_DIRECTION_BY_PLATFORM[platformIndex];
-        const starCount = MathUtils.randomInt(2, 4);
-        const starWidth = 40;
+        const starCount = MathUtils.randomInt(Constants.STAR_COUNT_MIN, Constants.STAR_COUNT_MAX);
+        const starWidth = Constants.STAR_GROUP_SIZE;
 
         // Aparición en el extremo opuesto a la dirección de movimiento inicial
         const spawnX = direction < 0

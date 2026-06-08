@@ -32,7 +32,7 @@ class ScoreSystem {
         }
 
         // Bonus por combo
-        if (this.jumpCombo % 3 === 0) {
+        if (this.jumpCombo % Constants.COMBO_BONUS_EVERY === 0) {
             this.score += Constants.POINTS_COMBO_BONUS;
             eventBus.emit(EventNames.SCORE_UPDATED, { 
                 score: this.score, 

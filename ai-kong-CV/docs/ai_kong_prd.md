@@ -127,7 +127,7 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 |----|-----------|
 | RT-01 | El juego debe implementarse exclusivamente en HTML5, CSS3 y JavaScript puro (ES6+). Queda prohibido el uso de frameworks JS (React, Vue, Angular), game engines (Phaser, PixiJS) o librerías de terceros de cualquier tipo. |
 | RT-02 | El rendering debe realizarse sobre un elemento `<canvas>` HTML5 usando la API 2D Context. Toda la lógica de juego debe encapsularse en un game loop basado en `requestAnimationFrame`. |
-| RT-03 | El código debe organizarse en módulos lógicos separados: GameLoop, Player, EnemyManager, PlatformManager, UIManager, ScoreManager, CollisionManager. Cada módulo debe ser independiente y comunicarse mediante eventos o interfaces claras. |
+| RT-03 | El código debe organizarse en módulos lógicos separados: GameLoop, Player, EnemyManager, PlatformManager, UIManager, ScoreManager, CollisionManager. Cada módulo debe ser independiente y comunicarse exclusivamente mediante el `eventBus` global (pub/sub) usando eventos `EventNames.*`; no debe importar ni invocar directamente a otros módulos. |
 | RT-04 | Se pueden incluir assets gráficos en formato PNG, SVG o WebP. Las imágenes deben cargarse de forma asíncrona antes del inicio del game loop mediante un Asset Loader. El juego no debe iniciar hasta que todos los assets estén cargados. |
 
 ### Rendimiento y compatibilidad
@@ -136,7 +136,7 @@ AI Kong es una experiencia arcade de plataformas de ciclo corto, inspirada en Do
 |----|-----------|
 | RT-05 | El game loop debe mantener 60 FPS estables en hardware moderno (Chrome / Firefox / Safari, últimas 2 versiones). La lógica de física y movimiento debe estar desacoplada del framerate usando **delta time**. |
 | RT-06 | La detección de colisiones debe implementarse como AABB (Axis-Aligned Bounding Box). Los hitboxes de jugador y enemigos deben ser más pequeños que su sprite visible para favorecer la sensación de juego justa. |
-| RT-07 | El canvas debe escalar correctamente a diferentes resoluciones de pantalla desktop usando CSS `object-fit` o transformaciones, manteniendo el aspect ratio original del escenario (recomendado 800×600 o 960×640). |
+| RT-07 | El canvas debe tener dimensiones fijas de 960×640 px (`width` y `height` del elemento `<canvas>`). No se permite escalado responsive ni redimensionamiento dinámico del canvas en CSS o JavaScript. |
 | RT-08 | El juego debe funcionar completamente offline. Todos los assets deben estar alojados localmente o embebidos. No se permiten dependencias de red en runtime. |
 
 ### Física y mecánicas del motor

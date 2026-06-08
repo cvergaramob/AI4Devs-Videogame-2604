@@ -10,18 +10,18 @@ class Switch extends Entity {
         super(x, y, Constants.SWITCH_WIDTH, Constants.SWITCH_HEIGHT);
         this.activated = false;
         this.pulsePhase = 0;
-        this.leverAngle = -0.55;
-        this._targetLeverAngle = -0.55;
+        this.leverAngle = Constants.SWITCH_LEVER_ANGLE_OFF;
+        this._targetLeverAngle = Constants.SWITCH_LEVER_ANGLE_OFF;
     }
 
     update(dt) {
         if (!this.active) return;
 
-        this.pulsePhase += dt * 2;
+        this.pulsePhase += dt * Constants.SWITCH_PULSE_SPEED;
 
-        const target = this.activated ? 0.72 : -0.55;
+        const target = this.activated ? Constants.SWITCH_LEVER_ANGLE_ON : Constants.SWITCH_LEVER_ANGLE_OFF;
         this._targetLeverAngle = target;
-        this.leverAngle += (target - this.leverAngle) * Math.min(1, dt * 12);
+        this.leverAngle += (target - this.leverAngle) * Math.min(1, dt * Constants.SWITCH_LEVER_LERP_SPEED);
     }
 
     render(ctx) {
@@ -34,61 +34,60 @@ class Switch extends Entity {
         const bw = this.width;
         const bh = this.height;
         const baseX = bx + bw * 0.5;
-        const baseY = by + bh - 10;
+        const baseY = by + bh - Constants.SWITCH_BASE_Y_OFFSET;
 
-        // Resplandor de advertencia (IA encendida)
         if (!this.activated) {
-            const glow = ctx.createRadialGradient(baseX, baseY - 8, 0, baseX, baseY - 8, 46);
+            const glow = ctx.createRadialGradient(baseX, baseY - 8, 0, baseX, baseY - 8, Constants.SWITCH_GLOW_RADIUS_OFF);
             glow.addColorStop(0, 'rgba(255, 238, 0, 0.35)');
             glow.addColorStop(1, 'rgba(255, 238, 0, 0)');
             ctx.fillStyle = glow;
-            ctx.globalAlpha = 0.45 + Math.sin(this.pulsePhase) * 0.2;
+            ctx.globalAlpha = Constants.SWITCH_GLOW_ALPHA_BASE + Math.sin(this.pulsePhase) * Constants.SWITCH_GLOW_ALPHA_AMP;
             ctx.fillRect(bx - 18, by - 12, bw + 36, bh + 24);
             ctx.globalAlpha = 1;
         } else {
-            const glow = ctx.createRadialGradient(baseX, baseY - 8, 0, baseX, baseY - 8, 36);
+            const glow = ctx.createRadialGradient(baseX, baseY - 8, 0, baseX, baseY - 8, Constants.SWITCH_GLOW_RADIUS_ON);
             glow.addColorStop(0, 'rgba(255, 80, 120, 0.4)');
             glow.addColorStop(1, 'rgba(255, 80, 120, 0)');
             ctx.fillStyle = glow;
-            ctx.globalAlpha = 0.55;
+            ctx.globalAlpha = Constants.SWITCH_GLOW_ALPHA_ON;
             ctx.fillRect(bx - 12, by - 8, bw + 24, bh + 16);
             ctx.globalAlpha = 1;
         }
 
-        // Pedestal metálico retro
-        ctx.fillStyle = '#1a2040';
-        ctx.fillRect(bx + 6, baseY - 6, bw - 12, 14);
-        ctx.strokeStyle = this.activated ? '#ff6688' : '#00ddff';
+        ctx.fillStyle = Constants.SWITCH_PEDESTAL_COLOR;
+        ctx.fillRect(bx + Constants.SWITCH_PEDESTAL_PAD_X, baseY - Constants.SWITCH_PEDESTAL_Y_OFFSET,
+            bw - Constants.SWITCH_PEDESTAL_PAD_X * 2, Constants.SWITCH_PEDESTAL_HEIGHT);
+        ctx.strokeStyle = this.activated ? Constants.SWITCH_STROKE_ON : Constants.SWITCH_STROKE_OFF;
         ctx.lineWidth = 2;
-        ctx.strokeRect(bx + 6, baseY - 6, bw - 12, 14);
+        ctx.strokeRect(bx + Constants.SWITCH_PEDESTAL_PAD_X, baseY - Constants.SWITCH_PEDESTAL_Y_OFFSET,
+            bw - Constants.SWITCH_PEDESTAL_PAD_X * 2, Constants.SWITCH_PEDESTAL_HEIGHT);
 
-        // Ranura de la palanca
-        ctx.fillStyle = '#0a0e27';
-        ctx.fillRect(baseX - 5, baseY - 10, 10, 8);
+        ctx.fillStyle = Constants.SWITCH_SLOT_COLOR;
+        ctx.fillRect(baseX - Constants.SWITCH_SLOT_W / 2, baseY - 10, Constants.SWITCH_SLOT_W, Constants.SWITCH_SLOT_H);
         ctx.strokeStyle = '#445566';
         ctx.lineWidth = 1;
-        ctx.strokeRect(baseX - 5, baseY - 10, 10, 8);
+        ctx.strokeRect(baseX - Constants.SWITCH_SLOT_W / 2, baseY - 10, Constants.SWITCH_SLOT_W, Constants.SWITCH_SLOT_H);
 
-        // Palanca
         ctx.save();
         ctx.translate(baseX, baseY - 6);
         ctx.rotate(this.leverAngle);
 
         const leverColor = this.activated ? '#ff4466' : '#ffee00';
         ctx.strokeStyle = leverColor;
-        ctx.lineWidth = 5;
+        ctx.lineWidth = Constants.SWITCH_LEVER_WIDTH;
         ctx.lineCap = 'round';
         ctx.shadowColor = leverColor;
-        ctx.shadowBlur = this.activated ? 10 : 6 + Math.sin(this.pulsePhase) * 3;
+        ctx.shadowBlur = this.activated
+            ? Constants.SWITCH_SHADOW_BLUR_ON
+            : Constants.SWITCH_SHADOW_BLUR_OFF_BASE + Math.sin(this.pulsePhase) * Constants.SWITCH_SHADOW_BLUR_OFF_AMP;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(0, -28);
+        ctx.lineTo(0, -Constants.SWITCH_LEVER_LENGTH);
         ctx.stroke();
 
-        // Empuñadura
         ctx.fillStyle = this.activated ? '#cc2244' : '#ccaa00';
         ctx.beginPath();
-        ctx.arc(0, -30, 7, 0, Math.PI * 2);
+        ctx.arc(0, -Constants.SWITCH_GRIP_Y, Constants.SWITCH_GRIP_RADIUS, 0, Math.PI * 2);
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1.5;
@@ -97,26 +96,26 @@ class Switch extends Entity {
         ctx.restore();
 
         // LED de estado
-        const ledX = bx + bw - 14;
-        const ledY = by + 8;
-        ctx.fillStyle = this.activated ? '#ff2244' : '#00ff88';
+        const ledX = bx + bw - Constants.SWITCH_LED_X_OFFSET;
+        const ledY = by + Constants.SWITCH_LED_Y;
+        ctx.fillStyle = this.activated ? Constants.SWITCH_LED_COLOR_ON : Constants.SWITCH_LED_COLOR_OFF;
         ctx.shadowColor = ctx.fillStyle;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = Constants.SWITCH_LED_SHADOW;
         ctx.beginPath();
-        ctx.arc(ledX, ledY, 4, 0, Math.PI * 2);
+        ctx.arc(ledX, ledY, Constants.SWITCH_LED_RADIUS, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
 
         // Etiqueta
-        ctx.font = '9px monospace';
+        ctx.font = Constants.SWITCH_LABEL_FONT;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillStyle = this.activated ? '#ff8899' : '#88ffcc';
+        ctx.fillStyle = this.activated ? Constants.SWITCH_LABEL_COLOR_ON : Constants.SWITCH_LABEL_COLOR_OFF;
         ctx.fillText(this.activated ? 'IA OFF' : 'IA ON', baseX, by + 2);
 
         if (!this.activated) {
-            ctx.font = '8px monospace';
-            ctx.fillStyle = 'rgba(255, 238, 0, 0.75)';
+            ctx.font = Constants.SWITCH_HINT_FONT;
+            ctx.fillStyle = Constants.SWITCH_HINT_COLOR;
             ctx.fillText('▲ PROTEGIDO POR IA', baseX, by - 14);
         }
 
@@ -139,8 +138,8 @@ class Switch extends Entity {
     reset() {
         this.activated = false;
         this.pulsePhase = 0;
-        this.leverAngle = -0.55;
-        this._targetLeverAngle = -0.55;
+        this.leverAngle = Constants.SWITCH_LEVER_ANGLE_OFF;
+        this._targetLeverAngle = Constants.SWITCH_LEVER_ANGLE_OFF;
         this.active = true;
         this.visible = true;
     }

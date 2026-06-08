@@ -26,21 +26,19 @@ class MenuScreen {
     }
 
     update(dt) {
-        this.pulsePhase += dt * 2.5;
+        this.pulsePhase += dt * Constants.MENU_PULSE_SPEED;
     }
 
     render(ctx) {
         const CW = Constants.CANVAS_WIDTH;
         const CH = Constants.CANVAS_HEIGHT;
 
-        // Fondo oscuro
-        ctx.fillStyle = '#0a0010';
+        ctx.fillStyle = Constants.MENU_BG_COLOR;
         ctx.fillRect(0, 0, CW, CH);
 
-        // Grid de fondo (decorativo)
-        ctx.strokeStyle = 'rgba(123, 47, 255, 0.12)';
+        ctx.strokeStyle = Constants.MENU_GRID_COLOR;
         ctx.lineWidth = 1;
-        const gridSize = 40;
+        const gridSize = Constants.MENU_GRID_SIZE;
         for (let x = 0; x < CW; x += gridSize) {
             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CH); ctx.stroke();
         }
@@ -52,48 +50,41 @@ class MenuScreen {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // ── TÍTULO "AI KONG" con glow multicapa ──
-        const titleY = 130;
-        ctx.font = 'bold 72px monospace';
+        const titleY = Constants.MENU_TITLE_Y;
+        ctx.font = Constants.MENU_TITLE_FONT;
 
-        // Glow exterior violeta
-        ctx.shadowColor = '#bf5fff';
-        ctx.shadowBlur = 40;
-        ctx.fillStyle = '#bf5fff';
+        ctx.shadowColor = Constants.MENU_TITLE_GLOW_OUTER;
+        ctx.shadowBlur = Constants.MENU_TITLE_SHADOW_BLUR_OUTER;
+        ctx.fillStyle = Constants.MENU_TITLE_GLOW_OUTER;
         ctx.fillText('AI KONG', CW / 2, titleY);
 
-        // Glow interior magenta
-        ctx.shadowColor = '#ff3aff';
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = '#ff3aff';
+        ctx.shadowColor = Constants.MENU_TITLE_GLOW_INNER;
+        ctx.shadowBlur = Constants.MENU_TITLE_SHADOW_BLUR_INNER;
+        ctx.fillStyle = Constants.MENU_TITLE_GLOW_INNER;
         ctx.fillText('AI KONG', CW / 2, titleY);
 
-        // Texto sólido cian
-        ctx.shadowColor = '#00eeff';
-        ctx.shadowBlur = 8;
-        ctx.fillStyle = '#00eeff';
+        ctx.shadowColor = Constants.MENU_TITLE_SOLID;
+        ctx.shadowBlur = Constants.MENU_TITLE_SHADOW_BLUR_SOLID;
+        ctx.fillStyle = Constants.MENU_TITLE_SOLID;
         ctx.fillText('AI KONG', CW / 2, titleY);
 
         ctx.shadowBlur = 0;
         ctx.shadowColor = 'transparent';
 
-        // ── Subtítulo ──
-        ctx.font = '20px monospace';
-        ctx.fillStyle = '#bf5fff';
-        ctx.fillText('Apaga la IA antes de que sea tarde', CW / 2, 185);
+        ctx.font = Constants.MENU_SUBTITLE_FONT;
+        ctx.fillStyle = Constants.MENU_SUBTITLE_COLOR;
+        ctx.fillText('Apaga la IA antes de que sea tarde', CW / 2, Constants.MENU_SUBTITLE_Y);
 
-        // ── Separador decorativo ──
-        ctx.strokeStyle = 'rgba(123, 47, 255, 0.5)';
+        ctx.strokeStyle = Constants.MENU_SEPARATOR_COLOR;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(CW / 2 - 220, 210);
-        ctx.lineTo(CW / 2 + 220, 210);
+        ctx.moveTo(CW / 2 - Constants.MENU_SEPARATOR_HALF_W, Constants.MENU_SEPARATOR_Y);
+        ctx.lineTo(CW / 2 + Constants.MENU_SEPARATOR_HALF_W, Constants.MENU_SEPARATOR_Y);
         ctx.stroke();
 
-        // ── Controles ──
-        ctx.font = 'bold 14px monospace';
-        ctx.fillStyle = '#00ffcc';
-        ctx.fillText('CONTROLES', CW / 2, 245);
+        ctx.font = Constants.MENU_CONTROLS_TITLE_FONT;
+        ctx.fillStyle = Constants.MENU_CONTROLS_TITLE_COLOR;
+        ctx.fillText('CONTROLES', CW / 2, Constants.MENU_CONTROLS_TITLE_Y);
 
         const controls = [
             ['← → / A D',    'Moverse'],
@@ -102,39 +93,35 @@ class MenuScreen {
             ['ESC',           'Pausar / Reanudar'],
         ];
 
-        ctx.font = '13px monospace';
-        let y = 275;
+        ctx.font = Constants.MENU_CONTROLS_FONT;
+        let y = Constants.MENU_CONTROLS_START_Y;
         for (const [key, desc] of controls) {
-            ctx.fillStyle = '#7b2fff';
+            ctx.fillStyle = Constants.MENU_CONTROLS_KEY_COLOR;
             ctx.textAlign = 'left';
-            ctx.fillText(key, CW / 2 - 160, y);
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'left';
-            ctx.fillText(desc, CW / 2 - 10, y);
-            y += 26;
+            ctx.fillText(key, CW / 2 + Constants.MENU_CONTROLS_KEY_X, y);
+            ctx.fillStyle = Constants.MENU_CONTROLS_DESC_COLOR;
+            ctx.fillText(desc, CW / 2 + Constants.MENU_CONTROLS_DESC_X, y);
+            y += Constants.MENU_CONTROLS_LINE_H;
         }
 
-        // ── Objetivo ──
         ctx.textAlign = 'center';
-        ctx.font = '14px monospace';
-        ctx.fillStyle = '#ffee00';
-        ctx.fillText('▲  Llega al interruptor y apaga a la IA  ▲', CW / 2, 420);
+        ctx.font = Constants.MENU_OBJECTIVE_FONT;
+        ctx.fillStyle = Constants.MENU_OBJECTIVE_COLOR;
+        ctx.fillText('▲  Llega al interruptor y apaga a la IA  ▲', CW / 2, Constants.MENU_OBJECTIVE_Y);
 
-        // ── "PRESIONA ENTER PARA COMENZAR" parpadeando ──
-        const alpha = Math.sin(this.pulsePhase) * 0.35 + 0.65;
+        const alpha = Math.sin(this.pulsePhase) * Constants.MENU_PROMPT_ALPHA_AMP + Constants.MENU_PROMPT_ALPHA_MIN;
         ctx.globalAlpha = alpha;
-        ctx.font = 'bold 18px monospace';
-        ctx.shadowColor = '#00ff88';
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = '#00ff88';
-        ctx.fillText('PRESIONA ESPACIO O ENTER PARA COMENZAR', CW / 2, 490);
+        ctx.font = Constants.MENU_PROMPT_FONT;
+        ctx.shadowColor = Constants.MENU_PROMPT_COLOR;
+        ctx.shadowBlur = Constants.MENU_PROMPT_SHADOW_BLUR;
+        ctx.fillStyle = Constants.MENU_PROMPT_COLOR;
+        ctx.fillText('PRESIONA ESPACIO O ENTER PARA COMENZAR', CW / 2, Constants.MENU_PROMPT_Y);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
 
-        // ── Versión ──
-        ctx.font = '11px monospace';
-        ctx.fillStyle = 'rgba(123,47,255,0.5)';
-        ctx.fillText('AI Kong · MVP v1.0', CW / 2, CH - 20);
+        ctx.font = Constants.MENU_VERSION_FONT;
+        ctx.fillStyle = Constants.MENU_VERSION_COLOR;
+        ctx.fillText(Constants.MENU_VERSION_TEXT, CW / 2, CH - Constants.MENU_VERSION_Y_OFFSET);
 
         ctx.restore();
     }

@@ -54,15 +54,13 @@ class HUD {
     }
 
     render(ctx) {
-        const pad = 12;
-        const barH = 36;
+        const pad = Constants.HUD_PAD;
+        const barH = Constants.HUD_BAR_HEIGHT;
 
-        // Banda de fondo semitransparente para toda la barra HUD
-        ctx.fillStyle = 'rgba(0, 0, 10, 0.72)';
+        ctx.fillStyle = Constants.HUD_BG_COLOR;
         ctx.fillRect(0, 0, Constants.CANVAS_WIDTH, barH + pad);
 
-        // Borde inferior de la banda
-        ctx.strokeStyle = 'rgba(123, 47, 255, 0.6)';
+        ctx.strokeStyle = Constants.HUD_BORDER_COLOR;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(0, barH + pad);
@@ -74,60 +72,55 @@ class HUD {
         ctx.save();
         ctx.textBaseline = 'middle';
 
-        // ── SCORE (arriba izquierda) ──
-        ctx.font = 'bold 15px monospace';
-        ctx.fillStyle = '#00ff88';
+        ctx.font = Constants.HUD_SCORE_FONT;
+        ctx.fillStyle = Constants.COLOR_TEXT_HUD;
         ctx.textAlign = 'left';
         const scoreStr = `SCORE: ${String(this.score).padStart(7, '0')}`;
         ctx.fillText(scoreStr, pad, midY);
 
-        // ── VIDAS (arriba centro) — miniaturas del jugador ──
-        const livesCenterX = Constants.CANVAS_WIDTH / 2 + 8;
-        const iconW = 14;
-        const iconH = 22;
-        const iconGap = 6;
+        const livesCenterX = Constants.CANVAS_WIDTH / 2 + Constants.HUD_LIVES_CENTER_OFFSET;
+        const iconW = Constants.HUD_LIVES_ICON_W;
+        const iconH = Constants.HUD_LIVES_ICON_H;
+        const iconGap = Constants.HUD_LIVES_GAP;
         const totalIconsW = Constants.LIVES_INITIAL * iconW + (Constants.LIVES_INITIAL - 1) * iconGap;
         const iconsStartX = livesCenterX - totalIconsW / 2;
 
-        ctx.font = 'bold 11px monospace';
-        ctx.fillStyle = '#aaaaaa';
+        ctx.font = Constants.HUD_LABEL_FONT;
+        ctx.fillStyle = Constants.HUD_LABEL_COLOR;
         ctx.textAlign = 'right';
-        ctx.fillText('VIDAS', iconsStartX - 10, midY);
+        ctx.fillText('VIDAS', iconsStartX - Constants.HUD_LIVES_LABEL_GAP, midY);
 
         for (let i = 0; i < Constants.LIVES_INITIAL; i++) {
             const ix = iconsStartX + i * (iconW + iconGap);
             this._renderLifeIcon(ctx, ix, midY - iconH / 2, i < this.lives);
         }
 
-        // ── TIMER (arriba derecha) ──
         const timeDisplay = Math.ceil(Math.max(0, this.timeRemaining));
-        const isUrgent = timeDisplay <= 15;
-        ctx.font = 'bold 15px monospace';
-        ctx.fillStyle = isUrgent ? '#ff4444' : '#ffffff';
+        const isUrgent = timeDisplay <= Constants.HUD_TIMER_URGENT_THRESHOLD;
+        ctx.font = Constants.HUD_SCORE_FONT;
+        ctx.fillStyle = isUrgent ? Constants.HUD_TIMER_URGENT_COLOR : Constants.HUD_TIMER_NORMAL_COLOR;
         ctx.textAlign = 'right';
         ctx.fillText(`TIME: ${String(timeDisplay).padStart(3, '0')}s`, Constants.CANVAS_WIDTH - pad, midY);
 
         ctx.restore();
 
-        // ── BARRA DE PROTECCIÓN (debajo del timer, visible solo si activa) ──
         if (this.protectionActive) {
-            this._renderProtectionBar(ctx, pad, barH + pad + 4);
+            this._renderProtectionBar(ctx, pad, barH + pad + Constants.HUD_PROTECTION_BAR_OFFSET);
         }
     }
 
-    /** Miniatura del jugador para el contador de vidas (activa / perdida) */
     _renderLifeIcon(ctx, x, y, active) {
         ctx.save();
-        const w = 14;
-        const h = 22;
+        const w = Constants.HUD_LIVES_ICON_W;
+        const h = Constants.HUD_LIVES_ICON_H;
 
         if (active) {
             ctx.fillStyle = Constants.COLOR_PLAYER;
             ctx.shadowColor = Constants.COLOR_PLAYER;
-            ctx.shadowBlur = 6;
+            ctx.shadowBlur = Constants.HUD_LIFE_SHADOW_BLUR;
         } else {
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.12)';
-            ctx.strokeStyle = 'rgba(0, 136, 255, 0.35)';
+            ctx.fillStyle = Constants.HUD_LIFE_INACTIVE_FILL;
+            ctx.strokeStyle = Constants.HUD_LIFE_INACTIVE_STROKE;
             ctx.lineWidth = 1;
         }
 
@@ -151,32 +144,28 @@ class HUD {
     }
 
     _renderProtectionBar(ctx, padRight, y) {
-        const barW = 160;
-        const barH = 6;
+        const barW = Constants.HUD_PROTECTION_BAR_W;
+        const barH = Constants.HUD_PROTECTION_BAR_H;
         const x = Constants.CANVAS_WIDTH - padRight - barW;
 
         const ratio = Math.max(0, this.protectionTime / Constants.PROTECTION_DURATION);
         const isBlinking = this.protectionTime < Constants.PROTECTION_BLINK_THRESHOLD;
 
-        // Parpadeo en últimos 3 segundos
-        if (isBlinking && Math.floor(this.protectionTime * 8) % 2 === 0) return;
+        if (isBlinking && Math.floor(this.protectionTime * Constants.HUD_PROTECTION_BLINK_RATE) % 2 === 0) return;
 
-        // Fondo de barra
-        ctx.fillStyle = 'rgba(0,255,136,0.15)';
+        ctx.fillStyle = Constants.HUD_PROTECTION_BG;
         ctx.fillRect(x, y, barW, barH);
 
-        // Relleno de barra
-        const fillColor = isBlinking ? '#ffee00' : '#00ff88';
+        const fillColor = isBlinking ? Constants.HUD_PROTECTION_BLINK_FILL : Constants.HUD_PROTECTION_FILL;
         ctx.fillStyle = fillColor;
         ctx.fillRect(x, y, barW * ratio, barH);
 
-        // Etiqueta
         ctx.save();
-        ctx.font = '10px monospace';
+        ctx.font = Constants.HUD_PROTECTION_FONT;
         ctx.fillStyle = fillColor;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
-        ctx.fillText('● PROTEGIDO', Constants.CANVAS_WIDTH - padRight, y + barH + 2);
+        ctx.fillText(Constants.HUD_PROTECTION_LABEL, Constants.CANVAS_WIDTH - padRight, y + barH + 2);
         ctx.restore();
     }
 

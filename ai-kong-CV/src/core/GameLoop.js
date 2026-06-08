@@ -12,7 +12,7 @@ class GameLoop {
         this.isRunning = false;
         this.lastTime = 0;
         this.deltaTime = 0;
-        this.fps = 60;
+        this.fps = Constants.TARGET_FPS;
         this.frameCount = 0;
         this.fpsCheckTime = 0;
         this.animationFrameId = null;
@@ -34,7 +34,12 @@ class GameLoop {
      * Pausar el loop
      */
     pause() {
+        if (!this.isRunning) return;
         this.isRunning = false;
+        if (this.animationFrameId !== null) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
     }
 
     /**
@@ -44,7 +49,7 @@ class GameLoop {
         if (this.isRunning) return;
         this.isRunning = true;
         this.lastTime = performance.now();
-        this._loop();
+        this.animationFrameId = requestAnimationFrame(() => this._loop());
     }
 
     /**
@@ -78,26 +83,25 @@ class GameLoop {
      * Loop privado
      */
     _loop() {
+        if (!this.isRunning) return;
+
         const currentTime = performance.now();
-        this.deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.05); // Max 50ms para evitar jumps
+        this.deltaTime = Math.min((currentTime - this.lastTime) / 1000, Constants.DELTA_TIME_CAP);
         this.lastTime = currentTime;
 
         // Calcular FPS cada segundo
         this.frameCount++;
-        if (currentTime - this.fpsCheckTime >= 1000) {
+        if (currentTime - this.fpsCheckTime >= Constants.FPS_CHECK_INTERVAL_MS) {
             this.fps = this.frameCount;
             this.frameCount = 0;
             this.fpsCheckTime = currentTime;
         }
 
-        // Ejecutar callbacks solo si el loop está activo
-        if (this.isRunning) {
-            if (this.updateCallback) {
-                this.updateCallback(this.deltaTime);
-            }
-            if (this.renderCallback) {
-                this.renderCallback();
-            }
+        if (this.updateCallback) {
+            this.updateCallback(this.deltaTime);
+        }
+        if (this.renderCallback) {
+            this.renderCallback();
         }
 
         this.animationFrameId = requestAnimationFrame(() => this._loop());

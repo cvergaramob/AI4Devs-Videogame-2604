@@ -96,7 +96,7 @@ class Platform extends Entity {
         ctx.closePath();
         ctx.fill();
 
-        ctx.strokeStyle = 'rgba(0,180,220,0.3)';
+        ctx.strokeStyle = Constants.PLATFORM_BOTTOM_STROKE_COLOR;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(x,  bodyLeft + height);
@@ -106,25 +106,25 @@ class Platform extends Entity {
         for (const gap of this.gaps) {
             const gx  = x + gap.x;
             const gx2 = gx + gap.width;
-            const gy1 = this.getTopY(gx)  - 2;
-            const gy2 = this.getTopY(gx2) - 2;
+            const gy1 = this.getTopY(gx)  - Constants.PLATFORM_GAP_OVERHANG;
+            const gy2 = this.getTopY(gx2) - Constants.PLATFORM_GAP_OVERHANG;
 
             ctx.fillStyle = Constants.COLOR_BACKGROUND;
             ctx.beginPath();
             ctx.moveTo(gx,  gy1);
             ctx.lineTo(gx2, gy2);
-            ctx.lineTo(gx2, gy2 + height + 4);
-            ctx.lineTo(gx,  gy1 + height + 4);
+            ctx.lineTo(gx2, gy2 + height + Constants.PLATFORM_GAP_BOTTOM_OVERHANG);
+            ctx.lineTo(gx,  gy1 + height + Constants.PLATFORM_GAP_BOTTOM_OVERHANG);
             ctx.closePath();
             ctx.fill();
 
-            ctx.strokeStyle = 'rgba(0,200,255,0.25)';
+            ctx.strokeStyle = Constants.PLATFORM_GAP_STROKE_COLOR;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(gx,  gy1);
-            ctx.lineTo(gx,  gy1 + height + 4);
+            ctx.lineTo(gx,  gy1 + height + Constants.PLATFORM_GAP_BOTTOM_OVERHANG);
             ctx.moveTo(gx2, gy2);
-            ctx.lineTo(gx2, gy2 + height + 4);
+            ctx.lineTo(gx2, gy2 + height + Constants.PLATFORM_GAP_BOTTOM_OVERHANG);
             ctx.stroke();
         }
 
@@ -132,7 +132,7 @@ class Platform extends Entity {
         ctx.strokeStyle = Constants.COLOR_PLATFORM_EDGE;
         ctx.lineWidth = 2;
         ctx.shadowColor = Constants.COLOR_PLATFORM_EDGE;
-        ctx.shadowBlur  = 4;
+        ctx.shadowBlur  = Constants.PLATFORM_EDGE_SHADOW_BLUR;
         ctx.beginPath();
         for (const seg of this.getSolidSegments()) {
             const sx  = seg.x;
@@ -151,19 +151,19 @@ class Platform extends Entity {
     /** Flechas de avance ascendente del jugador (solo decoración) */
     _renderDirectionCue(ctx, x, x2) {
         const sign = this.visualTiltSign;
-        const step = 72;
+        const step = Constants.PLATFORM_CUE_STEP;
         ctx.save();
-        ctx.strokeStyle = 'rgba(0, 221, 255, 0.22)';
-        ctx.fillStyle   = 'rgba(0, 221, 255, 0.18)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = Constants.PLATFORM_CUE_STROKE_COLOR;
+        ctx.fillStyle   = Constants.PLATFORM_CUE_FILL_COLOR;
+        ctx.lineWidth = Constants.PLATFORM_CUE_LINE_WIDTH;
 
-        for (let px = x + 36; px < x2 - 20; px += step) {
-            const py = this.getTopY(px) - 8;
-            const tipX = px + sign * 10;
+        for (let px = x + Constants.PLATFORM_CUE_START_OFFSET; px < x2 - Constants.PLATFORM_CUE_END_MARGIN; px += step) {
+            const py = this.getTopY(px) - Constants.PLATFORM_CUE_Y_OFFSET;
+            const tipX = px + sign * Constants.PLATFORM_CUE_TIP_OFFSET;
             ctx.beginPath();
-            ctx.moveTo(px - sign * 8, py + 3);
+            ctx.moveTo(px - sign * Constants.PLATFORM_CUE_BASE_OFFSET, py + 3);
             ctx.lineTo(tipX, py - 4);
-            ctx.lineTo(px - sign * 8, py - 1);
+            ctx.lineTo(px - sign * Constants.PLATFORM_CUE_BASE_OFFSET, py - 1);
             ctx.closePath();
             ctx.fill();
         }

@@ -43,7 +43,8 @@ class EventBus {
      */
     emit(eventName, data = null) {
         if (!this.events.has(eventName)) return;
-        this.events.get(eventName).forEach(handler => {
+        const handlers = [...this.events.get(eventName)];
+        handlers.forEach(handler => {
             try {
                 handler(data);
             } catch (error) {
@@ -59,8 +60,11 @@ class EventBus {
      */
     once(eventName, handler) {
         const wrappedHandler = (data) => {
-            handler(data);
-            this.off(eventName, wrappedHandler);
+            try {
+                handler(data);
+            } finally {
+                this.off(eventName, wrappedHandler);
+            }
         };
         this.on(eventName, wrappedHandler);
     }

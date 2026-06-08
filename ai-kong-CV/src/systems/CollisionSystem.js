@@ -43,7 +43,7 @@ class CollisionSystem {
         const cb       = player.getCollisionBounds();
         const feetY    = cb.y + cb.height;
         const centerX  = cb.x + cb.width / 2;
-        const tolerance = 8;
+        const tolerance = Constants.COLLISION_LAND_TOLERANCE;
 
         for (const platform of platforms) {
             // ¿El jugador cae sobre esta plataforma?
@@ -71,7 +71,7 @@ class CollisionSystem {
         const topY = platform.getTopY(centerX);
 
         // Pies cerca de la superficie
-        if (feetY < topY - tolerance || feetY > topY + tolerance + 10) return false;
+        if (feetY < topY - tolerance || feetY > topY + tolerance + Constants.COLLISION_LAND_WINDOW) return false;
 
         // Dentro del ancho horizontal de la plataforma
         if (centerX < platform.x || centerX > platform.x + platform.width) return false;
@@ -174,7 +174,7 @@ class CollisionSystem {
 
         const playerFeet = cb.y + cb.height;
         const starTop = sb.y;
-        const playerAboveStar = playerFeet <= starTop + sb.height * 0.55;
+        const playerAboveStar = playerFeet <= starTop + sb.height * Constants.STAR_JUMP_OVER_FACTOR;
 
         return playerAboveStar;
     }

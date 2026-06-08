@@ -5,15 +5,6 @@
  * Dependencias: Platform.js, Ladder.js, GreenOrb.js, Switch.js, RebelAI.js, Constants.js
  */
 
-/** Zona reservada del HUD superior (HUD.js: barH 36 + pad 12 = 48 px). El gameplay no debe invadir y < 48. */
-const HUD_RESERVE_Y = 48;
-
-/** Separación vertical entre plataformas consecutivas (> MAX_JUMP_HEIGHT 100 px). */
-const PLATFORM_VERTICAL_GAP = 102;
-
-/** Inclinación visual alternada (plataformas 1–6): +1 = izq. baja → der. alta; -1 = der. baja → izq. alta */
-const PLATFORM_TILT_PATTERN = [1, -1, 1, -1, 1, -1];
-
 const LEVEL_DATA = {
     platforms: [
         // Plataforma 1 – inicio del jugador (suelo)
@@ -32,15 +23,15 @@ const LEVEL_DATA = {
 
     ladders: [
         // Escalera 1→2 (lado derecho)
-        { x: 890, y: 526, width: 28, height: PLATFORM_VERTICAL_GAP, connectsFrom: 0, connectsTo: 1 },
+        { x: 890, y: 526, width: 28, height: Constants.PLATFORM_VERTICAL_GAP, connectsFrom: 0, connectsTo: 1 },
         // Escalera 2→3 (lado izquierdo)
-        { x: 60,  y: 424, width: 28, height: PLATFORM_VERTICAL_GAP, connectsFrom: 1, connectsTo: 2 },
+        { x: 60,  y: 424, width: 28, height: Constants.PLATFORM_VERTICAL_GAP, connectsFrom: 1, connectsTo: 2 },
         // Escalera 3→4 (lado derecho)
-        { x: 890, y: 322, width: 28, height: PLATFORM_VERTICAL_GAP, connectsFrom: 2, connectsTo: 3 },
+        { x: 890, y: 322, width: 28, height: Constants.PLATFORM_VERTICAL_GAP, connectsFrom: 2, connectsTo: 3 },
         // Escalera 4→5 (lado izquierdo)
-        { x: 60,  y: 220, width: 28, height: PLATFORM_VERTICAL_GAP, connectsFrom: 3, connectsTo: 4 },
+        { x: 60,  y: 220, width: 28, height: Constants.PLATFORM_VERTICAL_GAP, connectsFrom: 3, connectsTo: 4 },
         // Escalera 5→6 (extremo derecho de plataforma 5) — único acceso al interruptor
-        { x: 816, y: 118, width: 28, height: PLATFORM_VERTICAL_GAP, connectsFrom: 4, connectsTo: 5 }
+        { x: 816, y: 118, width: 28, height: Constants.PLATFORM_VERTICAL_GAP, connectsFrom: 4, connectsTo: 5 }
     ],
 
     /** Instanciar plataformas */
@@ -48,7 +39,7 @@ const LEVEL_DATA = {
         return LEVEL_DATA.platforms.map((cfg, idx) =>
             new Platform(
                 cfg.x, cfg.y, cfg.width, cfg.height, cfg.gaps,
-                PLATFORM_TILT_PATTERN[idx] ?? 1
+                Constants.PLATFORM_TILT_PATTERN[idx] ?? 1
             )
         );
     },
@@ -67,7 +58,7 @@ const LEVEL_DATA = {
             if (!cfg.hasOrb) return;
             const platform = new Platform(
                 cfg.x, cfg.y, cfg.width, cfg.height, cfg.gaps,
-                PLATFORM_TILT_PATTERN[idx] ?? 1
+                Constants.PLATFORM_TILT_PATTERN[idx] ?? 1
             );
             const orbX = cfg.orbX;
             const orbCenterY = platform.getTopY(orbX) - Constants.ORB_RADIUS;
@@ -82,7 +73,7 @@ const LEVEL_DATA = {
         const p = platforms ? platforms[0] : null;
         return p
             ? LEVEL_DATA.getPlatformRespawnPosition(p, platforms)
-            : { x: 80, y: 628 - Constants.PLAYER_HEIGHT };
+            : { x: Constants.LEVEL_PLAYER_SPAWN_X, y: 628 - Constants.PLAYER_HEIGHT };
     },
 
     /**
@@ -108,11 +99,11 @@ const LEVEL_DATA = {
         const cfg = LEVEL_DATA.platforms[4];
         const platform = new Platform(
             cfg.x, cfg.y, cfg.width, cfg.height, cfg.gaps,
-            PLATFORM_TILT_PATTERN[4]
+            Constants.PLATFORM_TILT_PATTERN[4]
         );
-        const aiX = cfg.x + cfg.width - Constants.AI_WIDTH - 24;
+        const aiX = cfg.x + cfg.width - Constants.AI_WIDTH - Constants.LEVEL_AI_X_OFFSET;
         const surfaceY = platform.getTopY(aiX + Constants.AI_WIDTH / 2);
-        return { x: aiX, y: surfaceY - Constants.AI_HEIGHT + 6 };
+        return { x: aiX, y: surfaceY - Constants.AI_HEIGHT + Constants.LEVEL_AI_Y_OFFSET };
     },
 
     /** Posición del interruptor — exclusivamente sobre la plataforma 6 (plataforma de apagado) */
@@ -120,20 +111,20 @@ const LEVEL_DATA = {
         const cfg = LEVEL_DATA.platforms[5];
         const platform = new Platform(
             cfg.x, cfg.y, cfg.width, cfg.height, cfg.gaps,
-            PLATFORM_TILT_PATTERN[5]
+            Constants.PLATFORM_TILT_PATTERN[5]
         );
         const switchX = cfg.x + (cfg.width - Constants.SWITCH_WIDTH) / 2;
         const centerX = switchX + Constants.SWITCH_WIDTH / 2;
         const surfaceY = platform.getTopY(centerX);
         return {
             x: switchX,
-            y: surfaceY - Constants.SWITCH_HEIGHT + 4
+            y: surfaceY - Constants.SWITCH_HEIGHT + Constants.LEVEL_SWITCH_Y_OFFSET
         };
     },
 
     /** Límite inferior del HUD (px). Útil para validaciones de layout. */
     getHudReserveY() {
-        return HUD_RESERVE_Y;
+        return Constants.HUD_RESERVE_Y;
     }
 };
 

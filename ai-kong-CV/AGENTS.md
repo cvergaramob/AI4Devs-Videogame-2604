@@ -49,7 +49,7 @@ All physics, timing, scoring, color, and size constants live in `src/core/Consta
 
 ### Level Geometry
 
-All platform positions, ladder positions, orb positions, and entity spawn points are defined in `config/LevelData.js`. Platforms are defined by `(x, y, width, holes[])` where `holes` is an array of `{ x, width }` offsets from the platform's left edge.
+All platform positions, ladder positions, orb positions, and entity spawn points are defined in `config/LevelData.js`. Platforms are defined by `(x, y, width, gaps[])` where `gaps` is an array of `{ x, width }` offsets from the platform's left edge.
 
 ### Object Pool
 
