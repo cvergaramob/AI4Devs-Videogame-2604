@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Kong - Arcade Platformer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas" width="960" height="640"></canvas>
+    </div>
+
+    <!-- Core Systems -->
+    <script src="src/core/Constants.js"></script>
+    <script src="src/core/EventBus.js"></script>
+    <script src="src/core/AssetLoader.js"></script>
+    <script src="src/core/StateMachine.js"></script>
+    <script src="src/core/GameLoop.js"></script>
+
+    <!-- Utilities -->
+    <script src="src/utils/MathUtils.js"></script>
+    <script src="src/utils/Collision.js"></script>
+    <script src="src/utils/ObjectPool.js"></script>
+
+    <!-- Entities -->
+    <script src="src/entities/Entity.js"></script>
+    <script src="src/entities/Player.js"></script>
+    <script src="src/entities/AIStar.js"></script>
+    <script src="src/entities/GreenOrb.js"></script>
+    <script src="src/entities/Platform.js"></script>
+    <script src="src/entities/Ladder.js"></script>
+    <script src="src/entities/Switch.js"></script>
+    <script src="src/entities/RebelAI.js"></script>
+
+    <!-- Systems -->
+    <script src="src/systems/PhysicsSystem.js"></script>
+    <script src="src/systems/CollisionSystem.js"></script>
+    <script src="src/systems/SpawnSystem.js"></script>
+    <script src="src/systems/LadderSystem.js"></script>
+    <script src="src/systems/ProtectionSystem.js"></script>
+    <script src="src/systems/ScoreSystem.js"></script>
+    <script src="src/systems/TimerSystem.js"></script>
+
+    <!-- UI -->
+    <script src="src/ui/HUD.js"></script>
+    <script src="src/ui/MenuScreen.js"></script>
+    <script src="src/ui/VictoryScreen.js"></script>
+    <script src="src/ui/GameOverScreen.js"></script>
+    <script src="src/ui/Renderer.js"></script>
+
+    <!-- Configuration -->
+    <script src="config/LevelData.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="src/core/Game.js"></script>
+</body>
+</html>

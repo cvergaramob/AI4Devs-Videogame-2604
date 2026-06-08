@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
+      "Bash(node -e \"console.log\\(process.env.NODE_PATH\\)\")",
+      "Bash(npm root *)",
+      "Bash(findstr \"8002\")",
+      "Bash(node test_climb.js)"
+    ]
+  }
+}
